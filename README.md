@@ -1,5 +1,6 @@
 # ExtensibleFood
 A small Minecraft Fabric mod which doesn't add anything... But allows you to add your own foods!
+This mod requires the [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api).
 
 ## License
 
