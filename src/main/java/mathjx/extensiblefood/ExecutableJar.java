@@ -70,7 +70,7 @@ final class ExecutableJar {
 				Desktop desktop = Desktop.getDesktop();
 
 				if (desktop.isSupported(Desktop.Action.BROWSE)) {
-					desktop.browse(new URI("https://www.youtube.com/"));
+					desktop.browse(new URI("http://htmlpreview.github.io/?https://github.com/mathjx000/ExtensibleFood/blob/1.16/docs/index.min.html"));
 					return true;
 				}
 			}
