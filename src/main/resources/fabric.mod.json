@@ -15,7 +15,7 @@
 	"icon": "assets/entensible_food/icon.png",
 	"environment": "*",
 	"entrypoints": {
-		"client": [
+		"main": [
 			"mathjx.extensiblefood.ExtensibleFood"
 		]
 	},

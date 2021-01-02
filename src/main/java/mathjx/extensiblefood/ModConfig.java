@@ -14,6 +14,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
+
 public final class ModConfig {
 
 	private static final Path MOD_CONFIG_FILE = ExtensibleFood.MOD_CONFIG_DIR.resolve("config.properties");
@@ -27,7 +30,7 @@ public final class ModConfig {
 
 	static {
 		final AtomicBoolean dirtyFlag = new AtomicBoolean(false);
-		Properties props = new Properties();
+		final Properties props = new Properties();
 
 //		boolean bShowModRelatedErrors = true;
 //		int iDisplayFoodTooltips = 0;
@@ -37,7 +40,6 @@ public final class ModConfig {
 		if (Files.exists(MOD_CONFIG_FILE)) {
 			try (Reader reader = Files.newBufferedReader(MOD_CONFIG_FILE, StandardCharsets.UTF_8)) {
 				props.load(reader);
-
 			} catch (IOException e) {
 				LOGGER.error("Failed to load configuration file '" + MOD_CONFIG_FILE.toString() + "'", e);
 //				dirtyFlag.set(true);
@@ -48,8 +50,16 @@ public final class ModConfig {
 //			initDefaults(props);
 		}
 
-		showModRelatedErrors = parseProperty(props, "show_mod_related_errors", Boolean::parseBoolean, () -> Boolean.toString(true), dirtyFlag);
-		displayFoodTooltipsBehavior = parseProperty(props, "display_food_tooltips_behavior", Integer::parseInt, () -> Integer.toString(0), dirtyFlag);
+		final boolean server = FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER;
+
+		if (!server) {
+			showModRelatedErrors = parseProperty(props, "show_mod_related_errors", Boolean::parseBoolean, () -> Boolean.toString(true), dirtyFlag);
+			displayFoodTooltipsBehavior = parseProperty(props, "display_food_tooltips_behavior", Integer::parseInt, () -> Integer.toString(0), dirtyFlag);
+		} else {
+			showModRelatedErrors = false;
+			displayFoodTooltipsBehavior = 0;
+		}
+
 		overrideFoodAdvancement = parseProperty(props, "override_food_advancement", Boolean::parseBoolean, () -> Boolean.toString(true), dirtyFlag);
 
 //		showModRelatedErrors = bShowModRelatedErrors;
@@ -57,7 +67,7 @@ public final class ModConfig {
 
 		if (dirtyFlag.get()) {
 			try (Writer writer = Files.newBufferedWriter(MOD_CONFIG_FILE, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
-				props.store(writer, null);
+				props.store(writer, "ExtensibleFood Mod Settings\nUse with care.\nWarning: Hosting a server with custom foods can produce unexpected results if the foods are not the same as the client.");
 			} catch (IOException e) {
 				LOGGER.error("Failed to save configuration file '" + MOD_CONFIG_FILE.toString() + "'", e);
 			}

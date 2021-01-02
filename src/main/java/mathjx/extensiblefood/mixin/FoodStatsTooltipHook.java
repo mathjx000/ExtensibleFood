@@ -16,6 +16,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 
+@SuppressWarnings("deprecation")
 @Mixin(ItemStack.class)
 public final class FoodStatsTooltipHook {
 

@@ -20,7 +20,8 @@ import com.google.gson.JsonObject;
 import mathjx.extensiblefood.command.FoodInfoCommand;
 import mathjx.extensiblefood.food.FoodLoader;
 import mathjx.extensiblefood.gui.screen.ErrorScreenGadget;
-import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -28,7 +29,7 @@ import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 
-public final class ExtensibleFood implements ClientModInitializer {
+public final class ExtensibleFood implements ModInitializer {
 
 	/**
 	 * The mod id
@@ -57,7 +58,7 @@ public final class ExtensibleFood implements ClientModInitializer {
 	/**
 	 * The resource pack directory
 	 */
-	public static final Path COMMON_RESOURCEPACK_DIR = MOD_CONFIG_DIR.resolve("common_resourcepack").toAbsolutePath();
+	public static final Path COMMON_RESOURCEPACK_DIR = MOD_CONFIG_DIR.resolve("resourcepack").toAbsolutePath();
 
 	public static final Set<String> USER_NAMESPACES = new HashSet<>();
 
@@ -76,7 +77,7 @@ public final class ExtensibleFood implements ClientModInitializer {
 	 * The entry point of the mod
 	 */
 	@Override
-	public void onInitializeClient() {
+	public void onInitialize() {
 		try {
 			if (Files.notExists(FOOD_DIR)) Files.createDirectories(FOOD_DIR);
 			if (Files.notExists(COMMON_RESOURCEPACK_DIR)) Files.createDirectories(COMMON_RESOURCEPACK_DIR);
@@ -85,6 +86,8 @@ public final class ExtensibleFood implements ClientModInitializer {
 		}
 
 		ModConfig.init();
+
+		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) LOGGER.warn("Warning: Hosting a server with custom foods can produce unexpected results if the foods are not the same as the client. Use at your own risk.");
 
 		LOGGER.debug("Starting loading cutom foods");
 		final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
@@ -132,7 +135,12 @@ public final class ExtensibleFood implements ClientModInitializer {
 					LOGGER.error("Failed to read file '" + file.toString() + '\'', e);
 				} catch (Exception e) {
 					LOGGER.error("Error reading file '" + fileName + '\'', e);
-					ErrorScreenGadget.report(file, e.getLocalizedMessage());
+
+					if (
+					// ensure client
+					FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT &&
+					// do not load classes if not required
+							ModConfig.showModRelatedErrors) ErrorScreenGadget.report(file, e.getLocalizedMessage());
 				}
 			}
 		}

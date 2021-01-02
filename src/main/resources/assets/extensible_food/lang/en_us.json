@@ -13,7 +13,7 @@
 	"commands.extensible_food.foodinfo.entry_effect.sub": "%s - Effect %s: duration: %s, amplifier: %s, ambient: %s, showParticles: %s, showIcon: %s",
 	"commands.extensible_food.foodinfo.text.boolean.true": "true",
 	"commands.extensible_food.foodinfo.text.boolean.false": "false",
-	"commands.extensible_food.foodinfo.invalid_item": "Item %s is not a Food Item.",
+	"argument.extensible_food.food_item.invalid": "Item '%s' is not a food",
 	"tooltip.extensible_food.header": "When Eaten:",
 	"tooltip.extensible_food.hunger": "%s Satiety",
 	"tooltip.extensible_food.saturation": "%s Saturation",

@@ -76,7 +76,7 @@ public final class AdvancementsInjector {
 						throw new RuntimeException("Same item entry processed twice!");
 				}
 
-				LOGGER.info("Replaced advancement {} with {} foods.", advancementID, names.size());
+				LOGGER.debug("Replaced advancement {} with {} foods.", advancementID, names.size());
 			}
 		}
 	}

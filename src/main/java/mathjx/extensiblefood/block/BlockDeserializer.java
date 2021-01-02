@@ -128,7 +128,7 @@ public final class BlockDeserializer {
 	}
 
 	private static Material parseMaterial(JsonElement jsonMaterial) throws JsonParseException {
-		if (JsonHelper.isString(jsonMaterial)) {
+		if (jsonMaterial.isJsonPrimitive()) {
 			final String materialName = jsonMaterial.getAsString().toLowerCase(Locale.ROOT);
 
 			// Don't say any thing... Just cry.

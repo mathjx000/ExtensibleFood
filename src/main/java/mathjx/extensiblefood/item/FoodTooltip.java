@@ -13,6 +13,7 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 
+@Deprecated
 public final class FoodTooltip {
 
 	private static final Text HEADER_TEXT = new TranslatableText("tooltip.extensible_food.header").formatted(Formatting.GRAY);
