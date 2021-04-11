@@ -5,42 +5,39 @@
 		<meta charset="utf-8" />
 		<title>Extensible Food - Format Specifications</title>
 		<link href='http://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
-		<link rel="stylesheet" href="styles/style.css" type="text/css" />
+		<link rel="stylesheet" href="styles/style.min.css" type="text/css" />
 	</head>
 	<body>
-		<!-- dirty inneficent firefox fix -->
-		<script>
-			if (navigator.appCodeName.toLowerCase().includes("mozilla")) {
-				document.body.parentElement.style.imageRendering = document.body.style.imageRendering = "crisp-edges";
-			}
-		</script>
-	
 		<div class="treeview">
 			<header>
-				<h1>Extensible Food - JSON Format</h1>
+				<div>
+					<a href="https://github.com/mathjx000/ExtensibleFood"><img id="title-left" src="images/icon.png" /></a>
+					<h1 id="title">Extensible Food - JSON Format</h1>
+					<a href="https://github.com/mathjx000"><img id="title-right" src="images/watermark.png" /></a>
+				</div>
 				<hr/>
 				<p>In this page you will find all the documentation on the JSON format used to create foods.</p>
 				<p>
 					Foods files must be placed in directory <var>/&lt;game_directory&gt;/config/extensible_food/foods/&lt;namespace&gt;/</var> where <var>&lt;namespace&gt;</var> is the namespace you want to use.<br/>
 					⚠ Warning: sub directories are not supported.<br/><br/>
-					The mod also requires the same resource files as for vanilla articles.<br/>
+					The mod also requires the same resource files as for vanilla elements.<br/>
 					These files are placed in a extern resourcepack located at <var>/&lt;game_directory&gt;/config/extensible_food/resourcepack/</var><br/>
-					You can add any resources to this directory, but you should only use textures, models, advancements, and recipes.
+					You can technically add any resources to this directory, but in most cases you should only use textures, models, advancements, and recipes.
 				</p>
 				<p><b><u>ProTip</u></b>: You can look at the logs files to get details of any errors.</p>
 			</header>
 			<article>
 			
 			<section id="global-layout">
-				<h2>Global Layout</h2>
+				<h2>Global JSON Layout</h2>
 				<hr/>
-				<p>The food file is defined using some root tags: <span class="json_sprite json_object"></span><a href="#food-properties"><code>food</code></a>, <span class="json_sprite json_object"></span><a href="#common-item-properties"><code>item</code></a> and <span class="json_sprite json_object"></span><a href="#block-properties"><code>block</code></a>.<br>
-				At least <var>food</var> and <var>item</var> must be defined, the <var>block</var> is optional and make the food a block.<br>
+				<p>Every food file is defined using root tags <span class="json_sprite json_object"></span><a href="#food-properties"><code>food</code></a>, <span class="json_sprite json_object"></span><a href="#common-item-properties"><code>item</code></a> and <span class="json_sprite json_object"></span><a href="#block-properties"><code>block</code></a>.<br>
+				At least <var>food</var> and <var>item</var> tags must be defined, the <var>block</var> is optional and adds also a block to the game.<br>
 				These tags are used with the following scheme:</p>
 				<ul>
 					<li>
 						<span class="json_sprite json_object"></span>
-						The root document tag
+						The document root tag
 						<ul>
 							<li>
 								<span class="json_sprite json_object"></span>
@@ -62,11 +59,11 @@
 			<section id="food-properties">
 				<h2>Food Properties</h2>
 				<hr/>
-				<p>More informations about foods in Minecraft can be found on the <a href="https://minecraft.gamepedia.com/Food" target="_blank">Official Wiki</a>.</p>
+				<p>More informations about foods in Minecraft can be found on the <a href="https://minecraft.fandom.com/wiki/Food" target="_blank">Official Wiki</a>.</p>
 				<ul>
 					<li>
 						<span class="json_sprite json_object"></span>
-						The root document tag
+						The document root tag
 						<ul>
 							<li>
 								<span class="json_sprite json_object"></span>
@@ -75,7 +72,7 @@
 								<ul>
 									<li>
 										<span class="json_sprite json_string"></span>
-										<code>base</code>: <em>(optional)</em> string representing a <a href="https://minecraft.gamepedia.com/Namespaced_ID" target="_blank">namespaced item id</a>, allows to use the values of a food already existing in the game. If other parameters are specified, they will override the current parameters.
+										<code>base</code>: <em>(optional)</em> string representing a <a href="https://minecraft.fandom.com/wiki/Namespaced_ID" target="_blank">namespaced item id</a>, allows to use the values of a food already existing in the game. If other parameters are specified, they will override the current parameters.
 									</li>
 									<li>
 										<span class="json_sprite json_int"></span>
@@ -103,7 +100,7 @@
 									</li>
 									<li>
 										<span class="json_sprite json_string"></span>
-										<code>eat_sound</code>: <em>(optional)</em> string <a href="https://minecraft.gamepedia.com/Namespaced_ID" target="_blank">namespaced id</a> of a sound. This property supports adding new sounds.
+										<code>eat_sound</code>: <em>(optional)</em> string <a href="https://minecraft.fandom.com/wiki/Namespaced_ID" target="_blank">namespaced id</a> of a sound. This property supports adding new sounds.
 									</li>
 									<li>
 										<span class="json_sprite json_array"></span>
@@ -130,7 +127,7 @@
 				<section id="food-effects-properties" class="sub_section">
 					<h2>Effect Properties</h2>
 					<hr/>
-					<p>More infomations about <a href="https://minecraft.gamepedia.com/Status_effect" target="_blank">Status Effects</a>.</p>
+					<p>More infomations about <a href="https://minecraft.fandom.com/Status_effect" target="_blank">Status Effects</a>.</p>
 					<ul>
 						<li>
 							<span class="json_sprite json_object"></span>
@@ -139,7 +136,7 @@
 							<ul>
 								<li>
 									<span class="json_sprite json_string"></span>
-									<code>id</code>: string <a href="https://minecraft.gamepedia.com/Namespaced_ID" target="_blank">namespaced id</a> of an effect.
+									<code>id</code>: string <a href="https://minecraft.fandom.com/Namespaced_ID" target="_blank">namespaced id</a> of an effect.
 								</li>
 								<li>
 									<span class="json_sprite json_int"></span>
@@ -197,11 +194,11 @@
 									</li>
 									<li>
 										<span class="json_sprite json_string"></span>
-										<code>name</code>: the name of the item. The format is specified by <a href="https://minecraft.gamepedia.com/Raw_JSON_text_format#Java_Edition" target="_blank">Raw JSON Text Format</a>.
+										<code>name</code>: the name of the item. The format is specified by <a href="https://minecraft.fandom.com/Raw_JSON_text_format#Java_Edition" target="_blank">Raw JSON Text Format</a>.
 									</li>
 									<li>
 										<span class="json_sprite json_string"></span>
-										<code>description</code>: <em>(optional)</em> the description (in the tooltip). The format is specified by <a href="https://minecraft.gamepedia.com/Raw_JSON_text_format#Java_Edition" target="_blank">Raw JSON Text Format</a>.
+										<code>description</code>: <em>(optional)</em> the description (in the tooltip). The format is specified by <a href="https://minecraft.fandom.com/Raw_JSON_text_format#Java_Edition" target="_blank">Raw JSON Text Format</a>.
 									</li>
 									<li>
 										<span class="json_sprite json_string"></span>
@@ -218,7 +215,7 @@
 									</li>
 									<li>
 										<span class="json_sprite json_string"></span>
-										<code>recipe_remainder</code>: <em>(optional)</em> string representing a <a href="https://minecraft.gamepedia.com/Namespaced_ID" target="_blank">namespaced id</a> of the item that remains after this item was used in a recipe.
+										<code>recipe_remainder</code>: <em>(optional)</em> string representing a <a href="https://minecraft.fandom.com/Namespaced_ID" target="_blank">namespaced id</a> of the item that remains after this item was used in a recipe.
 									</li>
 									<li>
 										<span class="json_sprite json_float"></span>
@@ -231,7 +228,7 @@
 				</ul>
 				
 				<section id="food-item-properties" class="sub_section">
-					<h2>Food Item Properties</h2>
+					<h2>Food Item Specific Properties</h2>
 					<hr/>
 					<ul>
 						<li>
@@ -254,7 +251,7 @@
 										</li>
 										<li>
 											<span class="json_sprite json_sprite"></span>
-											<code>consume_remainder</code>: <em>(optional)</em> string representing a <a href="https://minecraft.gamepedia.com/Namespaced_ID" target="_blank">namespaced id</a> of the item that remains after this item was eaten.
+											<code>consume_remainder</code>: <em>(optional)</em> string representing a <a href="https://minecraft.fandom.com/Namespaced_ID" target="_blank">namespaced id</a> of the item that remains after this item was eaten.
 										</li>
 									</ul>
 								</li>
@@ -264,7 +261,7 @@
 				</section>
 				
 				<section id="block-item-properties" class="sub_section">
-					<h2>Block Item Properties</h2>
+					<h2>Block Item Specific Properties</h2>
 					<hr/>
 					<ul>
 						<li>
@@ -289,8 +286,9 @@
 			</section>
 			
 			<section id="block-properties">
-				<h2>Block Properties</h2>
+				<h2>Common Block Properties</h2>
 				<hr/>
+				<p>Block properties common to every types of blocks are referenced here.</p>
 				
 				<ul>
 					<li>
@@ -299,16 +297,22 @@
 						
 						<ul>
 							<li>
+								<span class="json_sprite json_string"></span>
+								<code>type</code>: string indicating the type of block. Currently supported values are <a href="#block-consumable"><var>"consumable"</var></a> for blocks like Cake and <a href="#block-crop"><var>"crop"</var></a> for plantable blocks like Wheat.
+							</li>
+							<li>
 								<span class="json_sprite json_object"></span>
-								<code>material</code>: string or object, if string, the value is the name of the material:
+								<code>material</code><em>*</em>: string or object, if string, the value is the name of the material:
 								<details>
 									<summary style="cursor: pointer;">List of valid names</summary>
 									<div><var>"air"</var>, <var>"structure_void"</var>, <var>"portal"</var>, <var>"carpet"</var>, <var>"plant"</var>, <var>"underwater_plant"</var>, <var>"replaceable_plant"</var>, <var>"nether_shoots"</var>, <var>"replaceable_underwater_plant"</var>, <var>"water"</var>, <var>"bubble_column"</var>, <var>"lava"</var>, <var>"snow_layer"</var>, <var>"fire"</var>, <var>"supported"</var>, <var>"cobweb"</var>, <var>"redstone_lamp"</var>, <var>"organic_product"</var>, <var>"soil"</var>, <var>"solid_organic"</var>, <var>"dense_ice"</var>, <var>"aggregate"</var>, <var>"sponge"</var>, <var>"shulker_box"</var>, <var>"wood"</var>, <var>"nether_wood"</var>, <var>"bamboo_sapling"</var>, <var>"bamboo"</var>, <var>"wool"</var>, <var>"tnt"</var>, <var>"leaves"</var>, <var>"glass"</var>, <var>"ice"</var>, <var>"cactus"</var>, <var>"stone"</var>, <var>"metal"</var>, <var>"snow_block"</var>, <var>"repair_station"</var>, <var>"barrier"</var>, <var>"piston"</var>, <var>"unused_plant"</var>, <var>"ground"</var>, <var>"egg"</var>, <var>"cake"</var></div>
 								</details>
+								
+								<em>* In case of crop blocks, the default used material is <var>"plant"</var></em>
 							</li>
 							<li>
 								<span class="json_sprite json_object"></span>
-								<code>strength</code>
+								<code>strength</code><em>*</em>
 								
 								<ul>
 									<li>
@@ -320,22 +324,12 @@
 										<code>resistance</code>: float indicating the resistance to explosions
 									</li>
 								</ul>
-							</li>
-							<li>
-								<span class="json_sprite json_float"></span>
-								<code>slipperiness</code>: <em>(optional)</em> float indicating the slipperiness of the block. <span class="defval">(default: <var>0.6</var>)</span>
-							</li>
-							<li>
-								<span class="json_sprite json_float"></span>
-								<code>velocity_multiplier</code>: <em>(optional)</em> float indicating the multiplication factor of the speed of the entities walking on it. <span class="defval">(default: <var>1.0</var>)</span>
-							</li>
-							<li>
-								<span class="json_sprite json_float"></span>
-								<code>jump_velocity_multiplier</code>: <em>(optional)</em> float indicating the multiplication factor of the power of the jumps. <span class="defval">(default: <var>1.0</var>)</span>
+								
+								<em>* In case of crop blocks, the block does not have any strength by default</em>
 							</li>
 							<li>
 								<span class="json_sprite json_object"></span>
-								<code>sounds</code>: <em>(optional)</em> provide customs sounds. See <a href="https://minecraft.gamepedia.com/Sounds.json" target="_blank">Sounds.json</a> and <a href="https://minecraft.gamepedia.com/Sounds.json/Java_Edition_values" target="_blank">Java Edition Values</a> for more infos.
+								<code>sounds</code><em>*</em>: <em>(optional)</em> provide customs sounds. See <a href="https://minecraft.fandom.com/Sounds.json" target="_blank">Sounds.json</a> and <a href="https://minecraft.fandom.com/Sounds.json/Java_Edition_values" target="_blank">Java Edition Values</a> for more infos.
 								
 								<ul>
 									<li>
@@ -367,18 +361,8 @@
 										<code>fall_sound</code>
 									</li>
 								</ul>
-							</li>
-							<li>
-								<span class="json_sprite json_boolean"></span>
-								<code>require_tool</code>: <em>(optional)</em> boolean indicating if a tool is required to break the block. <span class="defval">(default: <var>false</var>)</span>
-							</li>
-							<li>
-								<span class="json_sprite json_int"></span>
-								<code>bites</code>: integer indicating how many times the block can be bitten.
-							</li>
-							<li>
-								<span class="json_sprite json_boolean"></span>
-								<code>comparator_enabled</code>: <em>(optional)</em> boolean indicating if comparators can mesure the block level like cake. <span class="defval">(default: <var>true</var>)</span>
+								
+								<em>* In case of crop blocks, defaults sounds are identical to Minecraft classic plants.</em>
 							</li>
 							<li>
 								<span class="json_sprite json_object"></span>
@@ -391,7 +375,7 @@
 									</li>
 									<li>
 										<span class="json_sprite json_array"></span>
-										<a href="#block-shapes"><code>&lt;bite_id&gt;</code></a>
+										<a href="#block-shapes"><code>&lt;variant_id&gt;</code></a>
 									</li>
 									<li>
 										<span class="json_sprite json_array"></span>
@@ -410,13 +394,23 @@
 									</li>
 									<li>
 										<span class="json_sprite json_int"></span>
-										<code>&lt;bite_id&gt;</code>
+										<code>&lt;variant_id&gt;</code>
 									</li>
 									<li>
 										<span class="json_sprite json_int"></span>
 										...
 									</li>
 								</ul>
+							</li>
+							<li>
+								<span class="json_sprite json_array"></span>
+								<span class="json_sprite json_object"></span>
+								<a href="#block-particles"><code>particles</code></a>: <em>(optional)</em> an object or array of objects defining particles spawning behaviors.
+							</li>
+							<li>
+								<span class="json_sprite json_array"></span>
+								<span class="json_sprite json_object"></span>
+								<a href="#block-collision_effects"><code>collision_effects</code></a>: <em>(optional)</em> an object or array of objects defining collision effects to apply on living entities touching the block.
 							</li>
 							<li>
 								<span class="json_sprite json_array"></span>
@@ -433,9 +427,86 @@
 									</li>
 								</ul>
 							</li>
+							<li>&lt;...&gt;</li>
 						</ul>
 					</li>
 				</ul>
+				
+				<section id="block-consumable" class="sub_section">
+					<h2>Consumable Block Properties</h2>
+					<hr/>
+					<p></p>
+					
+					<ul>
+						<li>
+							<span class="json_sprite json_object"></span>
+							The block tag
+							
+							<ul>
+								<li>&lt;...&gt;</li>
+								<li>
+									<span class="json_sprite json_float"></span>
+									<code>slipperiness</code>: <em>(optional)</em> float indicating the slipperiness of the block. <span class="defval">(default: <var>0.6</var>)</span>
+								</li>
+								<li>
+									<span class="json_sprite json_float"></span>
+									<code>velocity_multiplier</code>: <em>(optional)</em> float indicating the multiplication factor of the speed of the entities walking on it. <span class="defval">(default: <var>1.0</var>)</span>
+								</li>
+								<li>
+									<span class="json_sprite json_float"></span>
+									<code>jump_velocity_multiplier</code>: <em>(optional)</em> float indicating the multiplication factor of the power of the jumps. <span class="defval">(default: <var>1.0</var>)</span>
+								</li>
+								<li>
+									<span class="json_sprite json_boolean"></span>
+									<code>require_tool</code>: <em>(optional)</em> boolean indicating if a tool is required to break the block. <span class="defval">(default: <var>false</var>)</span>
+								</li>
+								<li>
+									<span class="json_sprite json_int"></span>
+									<code>bites</code>: integer indicating how many times the block can be bitten.
+								</li>
+								<li>
+									<span class="json_sprite json_boolean"></span>
+									<code>comparator_enabled</code>: <em>(optional)</em> boolean indicating if comparators can mesure the block level like cake. <span class="defval">(default: <var>true</var>)</span>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+				
+				<section id="block-crop" class="sub_section">
+					<h2>Crop Block Properties</h2>
+					<hr/>
+					<p></p>
+					
+					<ul>
+						<li>
+							<span class="json_sprite json_object"></span>
+							The block tag
+							
+							<ul>
+								<li>&lt;...&gt;</li>
+								<li>
+									<span class="json_sprite json_int"></span>
+									<code>max_age</code>: int representing the maximum age of the crop block.
+								</li>
+								<li>
+									<span class="json_sprite json_int"></span>
+									<code>minimum_light</code>: <em>(optional)</em> the minimum light required to the plant grow. <span class="defval">(default: <var>9</var>)</span>
+								</li>
+								<li>
+									<span class="json_sprite json_int"></span>
+									<code>maximum_light</code>: <em>(optional)</em> the maximum light required to the plant grow. <span class="defval">(default: <var>15</var>)</span>
+								</li>
+								<li>
+									<span class="json_sprite json_int"></span>
+									<code>fertilizable</code>: <em>(optional)</em> if the plant is fertilizable (using Bone Meal). <span class="defval">(default: <var>true</var>)</span>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+				
+				<hr/>
 				
 				<section id="custom-meterials" class="sub_section">
 					<h2>Custom Materials</h2>
@@ -535,10 +606,164 @@
 					</ul>
 				</section>
 				
+				<section id="block-particles" class="sub_section">
+					<h2>Particle Properties</h2>
+					<hr/>
+					<ul>
+						<li>
+							<span class="json_sprite json_array"></span>
+							<span class="json_sprite json_object"></span>
+							The particles object / array of objects
+							
+							<ul>
+								<li>
+									<span class="json_sprite json_array"></span>
+									<span class="json_sprite json_object"></span>
+									<code>box</code>: an object or array of objects representing particles spawn areas.<br/>
+									
+									<ul>
+										<li>
+											<span class="json_sprite json_array"></span>
+											<span class="json_sprite json_object"></span>
+											<code>from</code>: the first box coordinates
+										</li>
+										<li>
+											<span class="json_sprite json_array"></span>
+											<span class="json_sprite json_object"></span>
+											<code>to</code>: the second box coordinates
+										</li>
+									</ul>
+									
+									A box is represented using to point coordinates <var>from</var> and <var>to</var>.<br/>
+									The coordinates are expressed in the range of <var>0</var> to <var>16</var> in the form of an array: <var>[ &lt;x&gt;, &lt;y&gt;, &lt;z&gt; ]</var>
+									or in the form of an object: <var>{ &quot;x&quot;: &lt;x&gt;, &quot;y&quot;:&lt;y&gt;, &quot;z&quot;:&lt;z&gt; }</var>.
+								</li>
+								<li>
+									<span class="json_sprite json_float"></span>
+									<code>batch_chance</code>: <em>(optional)</em> the chance for an entire batch of particles to be spawned. You should use this property if you want to spawn your particles in group. <span class="defval">(default: <var>1.0</var>)</span>
+								</li>
+								<li>
+									<span class="json_sprite json_float"></span>
+									<code>chance</code>: <em>(optional)</em> the chance for a single particle in the batch to be spawned. <span class="defval">(default: <var>1.0</var>)</span>
+								</li>
+								<li>
+									<span class="json_sprite json_int"></span>
+									<code>per_batch_amount</code>: <em>(optional)</em> how many particles will try to be spawned each batch. <span class="defval">(default: <var>1</var>)</span>
+								</li>
+								<li>
+									<span class="json_sprite json_boolean"></span>
+									<code>important</code>: <em>(optional)</em> if the spawned particles are marked as important. <span class="defval">(default: <var>false</var>)</span>
+								</li>
+								<li>
+									<span class="json_sprite json_int"></span>
+									<code>always_spawn</code>: <em>(optional)</em> if the particles should be always visible ignoring player particle settings. <strong>Use with care.</strong> <span class="defval">(default: <var>false</var>)</span>
+								</li>
+								<li>
+									<span class="json_sprite json_string"></span>
+									<code>particle</code>: string representing the particle type id followed by parameters (if required by the particle).<br/>
+									See the <a href="https://minecraft.fandom.com/wiki/Argument_types#particle" target="_blank">Official Wiki</a> for more informations about particles and their parameters.
+								</li>
+								<li>
+									<span class="json_sprite json_array"></span>
+									<span class="json_sprite json_object"></span>
+									<code>velocity_base</code>: <em>(optional)</em> the base velocity applied to spawned particles.<br/>
+									<var>[ &lt;dx&gt;, &lt;dy&gt;, &lt;dy&gt; ]</var> or <var>{ &quot;x&quot;: &lt;dx&gt;, &quot;y&quot;:&lt;dy&gt;, &quot;z&quot;:&lt;dz&gt; }</var>
+								</li>
+								<li>
+									<span class="json_sprite json_array"></span>
+									<span class="json_sprite json_object"></span>
+									<code>velocity_base</code>: <em>(optional)</em> the random velocity delta added to the <code>velocity_base</code>.<br/>
+									<var>[ &lt;dx&gt;, &lt;dy&gt;, &lt;dy&gt; ]</var> or <var>{ &quot;x&quot;: &lt;dx&gt;, &quot;y&quot;:&lt;dy&gt;, &quot;z&quot;:&lt;dz&gt; }</var>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+				
+				<section id="block-collision_effects" class="sub_section">
+					<h2>Collision Effect Properties</h2>
+					<hr/>
+					<p>Collision Effects are applied to living entities that collides with the block.<br/>
+					The is actually 2 effect type available: <a href="#block-collision_effects-thorns"><var>thorns</var></a> and <a href="#block-collision_effects-slow_movement"><var>slow_movement</var></a></p>
+					
+					<ul>
+						<li>
+							<span class="json_sprite json_array"></span>
+							<span class="json_sprite json_object"></span>
+							The effect object
+							
+							<ul>
+								<li>
+									<span class="json_sprite json_string"></span>
+									<code>type</code>: the type of effect:  <var>thorns</var> or <var>slow_movement</var>.
+								</li>
+								<li>
+									<span class="json_sprite json_array"></span>
+									<span class="json_sprite json_string"></span>
+									<code>exclude</code>: <em>(optional)</em> the entity or array of entities id to ignore.
+								</li>
+								<li>...</li>
+							</ul>
+						</li>
+					</ul>
+					
+					<section id="block-collision_effects-thorns" class="sub_section">
+						<h3>Thorns Collision Effect</h3>
+						<hr/>
+						<p>Inflicts damages to living entities that collides with the block.</p>
+						
+						<ul>
+							<li>
+								The effect object
+								
+								<ul>
+									<li>
+										<span class="json_sprite json_string"></span>
+										<code>type</code>: <var>thorns</var>
+									</li>
+									<li>
+										<span class="json_sprite json_float"></span>
+										<code>damages</code>: <em>(optional)</em> the amount of damages inflicted to the entity. <span class="defval">(default: <var>1.0</var>)</span>
+									</li>
+									<li>
+										<span class="json_sprite json_float"></span>
+										<code>movement_threshold</code>: <em>(optional)</em> the movement threshold before the entity start taking damages.
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</section>
+					
+					<section id="block-collision_effects-slow_movement" class="sub_section">
+						<h3>Slow Movement Collision Effect</h3>
+						<hr/>
+						<p>Applies movement multiplier to living entities that collides with the block.</p>
+						
+						<ul>
+							<li>
+								The effect object
+								
+								<ul>
+									<li>
+										<span class="json_sprite json_string"></span>
+										<code>type</code>: <var>slow_movement</var>
+									</li>
+									<li>
+										<span class="json_sprite json_array"></span>
+										<span class="json_sprite json_object"></span>
+										<code>multiplier</code>: <em>(optional)</em> the movement speed multiplier applied to the targeted entity.</span><br/>
+										<var>[ &lt;dx&gt;, &lt;dy&gt;, &lt;dy&gt; ]</var> or <var>{ &quot;x&quot;: &lt;dx&gt;, &quot;y&quot;:&lt;dy&gt;, &quot;z&quot;:&lt;dz&gt; }</var>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</section>
+				</section>
+				
 				<section id="block-placement-conditions" class="sub_section">
 					<h2>Placement Conditions Properties</h2>
-					<p>A placement condition is an object that defines one or a collection of conditions to validate so that the block can remain in place when placed in the world.</p>
 					<hr/>
+					<p>A placement condition is an object that defines one or a collection of conditions to validate so that the block can remain in place when placed in the world.</p>
 					
 					<ul>
 						<li>
@@ -559,10 +784,9 @@
 					
 					<section>
 						<h3>Block Predicate Condition</h3>
-						<p>
-							This condition allows the use of command block predicates in the <a href="https://minecraft.gamepedia.com/Commands/execute#if" target="_blank">execute command</a><br>
-						</p>
 						<hr/>
+						
+						<p>This condition allows the use of command block predicates in the <a href="https://minecraft.fandom.com/Commands/execute#if" target="_blank">execute command</a>.</p>
 						
 						<ul>
 							<li>

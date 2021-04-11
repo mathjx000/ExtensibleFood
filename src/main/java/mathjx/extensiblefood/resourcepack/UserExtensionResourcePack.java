@@ -1,6 +1,10 @@
 package mathjx.extensiblefood.resourcepack;
 
-import static mathjx.extensiblefood.ExtensibleFood.*;
+import static mathjx.extensiblefood.ExtensibleFood.COMMON_RESOURCEPACK_DIR;
+import static mathjx.extensiblefood.ExtensibleFood.LOGGER;
+import static mathjx.extensiblefood.ExtensibleFood.METADATA;
+import static mathjx.extensiblefood.ExtensibleFood.MOD_ID;
+import static mathjx.extensiblefood.ExtensibleFood.USER_NAMESPACES;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -27,20 +31,20 @@ public final class UserExtensionResourcePack extends AbstractFileResourcePack {
 		super(null);
 	}
 
-	private Path getPath(String name) {
-		Path p = COMMON_RESOURCEPACK_DIR.resolve(name).normalize();
+	private Path getPath(final String name) {
+		final Path p = COMMON_RESOURCEPACK_DIR.resolve(name).normalize();
 		if (!p.startsWith(COMMON_RESOURCEPACK_DIR)) return null;
 		return p;
 	}
 
 	@Override
-	public Collection<Identifier> findResources(ResourceType type, String namespace, String prefix, int maxDepth,
-			Predicate<String> pathFilter) {
-		Path relativiser = getPath(type.getDirectory() + '/' + namespace);
-		Path path = relativiser.resolve(prefix);
-		Collection<Identifier> identifiers = new ArrayList<>();
+	public Collection<Identifier> findResources(final ResourceType type, final String namespace, final String prefix,
+			final int maxDepth, final Predicate<String> pathFilter) {
+		final Path relativiser = getPath(type.getDirectory() + '/' + namespace);
+		final Path path = relativiser.resolve(prefix);
+		final Collection<Identifier> identifiers = new ArrayList<>();
 
-		String systemSeparator = path.getFileSystem().getSeparator();
+		final String systemSeparator = path.getFileSystem().getSeparator();
 
 		try {
 			if (path != null && Files.isDirectory(path, linkOptions)) {
@@ -49,7 +53,7 @@ public final class UserExtensionResourcePack extends AbstractFileResourcePack {
 						.filter(Files::isRegularFile)
 						// ensure the file is not an metadata file and the filter accept this path
 						.filter(p -> {
-							String filename = p.getFileName().toString();
+							final String filename = p.getFileName().toString();
 							return !filename.endsWith(".mcmeta") && pathFilter.test(filename);
 						})
 						// make paths relative to the namespace
@@ -60,12 +64,12 @@ public final class UserExtensionResourcePack extends AbstractFileResourcePack {
 						.forEach(p -> {
 							try {
 								identifiers.add(new Identifier(namespace, p));
-							} catch (InvalidIdentifierException e) {
+							} catch (final InvalidIdentifierException e) {
 								LOGGER.error(e.getMessage());
 							}
 						});
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.warn("findResources custom at " + path + " in namespace " + namespace + ", mod " + MOD_ID
 					+ " failed!", e);
 		}
@@ -74,16 +78,16 @@ public final class UserExtensionResourcePack extends AbstractFileResourcePack {
 	}
 
 	@Override
-	public Set<String> getNamespaces(ResourceType type) {
+	public Set<String> getNamespaces(final ResourceType type) {
 		return USER_NAMESPACES;
 	}
 
 	@Override
-	protected InputStream openFile(String name) throws IOException {
-		InputStream stream = ModResourcePackUtil.openDefault(METADATA, name);
+	protected InputStream openFile(final String name) throws IOException {
+		final InputStream stream = ModResourcePackUtil.openDefault(METADATA, name);
 		if (stream != null) return stream;
 
-		Path path = getPath(name);
+		final Path path = getPath(name);
 		if (path == null || Files.notExists(path, linkOptions)) {
 //			Matcher matcher = FAKEABLE_ITEM.matcher(name);
 //			if (matcher.matches()) {
@@ -94,7 +98,7 @@ public final class UserExtensionResourcePack extends AbstractFileResourcePack {
 //
 //				// return the generated text as an input stream
 //				return new ByteArrayInputStream(new GsonBuilder().create().toJson(jsonModel).getBytes(StandardCharsets.UTF_8));
-//			} else 
+//			} else
 			throw new FileNotFoundException(name);
 		}
 
@@ -102,11 +106,11 @@ public final class UserExtensionResourcePack extends AbstractFileResourcePack {
 	}
 
 	@Override
-	protected boolean containsFile(String name) {
+	protected boolean containsFile(final String name) {
 		if (ModResourcePackUtil.containsDefault(METADATA, name)) return true;
 //		if (FAKEABLE_ITEM.matcher(name).matches()) return true;
 
-		Path path = getPath(name);
+		final Path path = getPath(name);
 		return path != null && Files.exists(path, linkOptions);
 	}
 
@@ -124,9 +128,9 @@ public final class UserExtensionResourcePack extends AbstractFileResourcePack {
 
 //	/**
 //	 * Generate a basic item model based on the texture of the food
-//	 * 
+//	 *
 //	 * @param  textureID the {@link Identifier} of the food
-//	 * 
+//	 *
 //	 * @return           a JSON object ready to be injected with other game models
 //	 */
 //	private JsonObject generateBasicItemModel(Identifier textureID) {

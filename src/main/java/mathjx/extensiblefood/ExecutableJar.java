@@ -11,7 +11,7 @@ import javax.swing.JOptionPane;
 final class ExecutableJar {
 
 	@SuppressWarnings("deprecation")
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		if (GraphicsEnvironment.isHeadless()) return;
 
 		final String[] options = { "Open Online Wiki Page", /* "Open Intern Wiki Page", */ "Close" };
@@ -28,9 +28,7 @@ final class ExecutableJar {
 
 		final Object selected = optionPane.getValue();
 
-		if (selected == null) {
-			return;
-		} else if (selected == options[0]) {
+		if (selected == null) {} else if (selected == options[0]) {
 			browseOnlineDocPage();
 //		} else if (selected == options[1]) {
 //			browseInternalDocPage();
@@ -67,14 +65,14 @@ final class ExecutableJar {
 	private static boolean browseOnlineDocPage() {
 		try {
 			if (!GraphicsEnvironment.isHeadless() && Desktop.isDesktopSupported()) {
-				Desktop desktop = Desktop.getDesktop();
+				final Desktop desktop = Desktop.getDesktop();
 
 				if (desktop.isSupported(Desktop.Action.BROWSE)) {
 					desktop.browse(new URI("http://htmlpreview.github.io/?https://github.com/mathjx000/ExtensibleFood/blob/1.16/docs/index.min.html"));
 					return true;
 				}
 			}
-		} catch (Throwable e) {
+		} catch (final Throwable e) {
 			e.printStackTrace();
 		}
 

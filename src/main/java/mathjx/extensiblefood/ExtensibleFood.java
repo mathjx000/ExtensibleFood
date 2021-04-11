@@ -81,7 +81,7 @@ public final class ExtensibleFood implements ModInitializer {
 		try {
 			if (Files.notExists(FOOD_DIR)) Files.createDirectories(FOOD_DIR);
 			if (Files.notExists(COMMON_RESOURCEPACK_DIR)) Files.createDirectories(COMMON_RESOURCEPACK_DIR);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.error("Failed to create directory", e);
 		}
 
@@ -96,15 +96,15 @@ public final class ExtensibleFood implements ModInitializer {
 
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(FOOD_DIR, ExtensibleFood::isValidFoodNamespace)) {
 			final FoodLoader loader = new FoodLoader();
-			for (Path dir : stream) {
+			for (final Path dir : stream) {
 				LOGGER.debug("Searching in namespace directory {}", FOOD_DIR.relativize(dir).toString());
 				try {
 					counter += readNamespaceDirectory(dir, gson, loader);
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOGGER.error("Failed to read files in food directory '" + dir.toString() + "'", e);
 				}
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.error("Error when loading foods in directory {}", FOOD_DIR, e);
 		}
 
@@ -113,27 +113,27 @@ public final class ExtensibleFood implements ModInitializer {
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> FoodInfoCommand.register(dispatcher));
 	}
 
-	private int readNamespaceDirectory(Path dir, Gson gson, FoodLoader loader) throws IOException {
+	private int readNamespaceDirectory(final Path dir, final Gson gson, final FoodLoader loader) throws IOException {
 		final String namespace = dir.getFileName().toString();
 		USER_NAMESPACES.add(namespace);
 
 		int counter = 0;
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, ExtensibleFood::isValidFoodFile)) {
-			for (Path file : stream) {
-				String fileName = file.getFileName().toString();
+			for (final Path file : stream) {
+				final String fileName = file.getFileName().toString();
 				LOGGER.debug("Loading food {}", fileName);
 
 				try (Reader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
-					JsonElement element = gson.fromJson(reader, JsonElement.class);
-					JsonObject object = JsonHelper.asObject(element, "top element");
+					final JsonElement element = gson.fromJson(reader, JsonElement.class);
+					final JsonObject object = JsonHelper.asObject(element, "top element");
 
-					Identifier autoId = new Identifier(namespace, fileName.substring(0, fileName.length() - ".json".length()));
+					final Identifier autoId = new Identifier(namespace, fileName.substring(0, fileName.length() - ".json".length()));
 					loader.applyFood(object, autoId);
 
 					counter++;
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOGGER.error("Failed to read file '" + file.toString() + '\'', e);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					LOGGER.error("Error reading file '" + fileName + '\'', e);
 
 					if (
@@ -147,11 +147,11 @@ public final class ExtensibleFood implements ModInitializer {
 		return counter;
 	}
 
-	private static boolean isValidFoodNamespace(Path path) throws IOException {
+	private static boolean isValidFoodNamespace(final Path path) throws IOException {
 		return Files.isDirectory(path);
 	}
 
-	private static boolean isValidFoodFile(Path path) throws IOException {
+	private static boolean isValidFoodFile(final Path path) throws IOException {
 		return path.getFileName().toString().endsWith(".json") && Files.isRegularFile(path);
 	}
 

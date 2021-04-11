@@ -23,7 +23,9 @@ html, body {
 	
 	background-image: url("../images/background_light.png");
 	background-repeat: repeat;
+	image-rendering: crisp-edges;
 	image-rendering: pixelated;
+	
 	background-size: 128px;
 	
 	scroll-behavior: smooth;
@@ -87,6 +89,20 @@ section section {
 	border-bottom-style: solid;
 	border-bottom-color: gray;
 	border-bottom-width: thin;
+}
+
+#title {
+	display: inline;
+	margin-left: 1rem;
+}
+
+#title-left {
+	vertical-align: middle;
+}
+
+#title-right {
+	vertical-align: middle;
+	float: right;
 }
 
 .treeview {

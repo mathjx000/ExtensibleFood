@@ -25,13 +25,13 @@ public abstract class BlockStayCondition {
 
 	/**
 	 * Test this condition
-	 * 
-	 * @param  state the state about to be placed
-	 * @param  world the world
-	 * @param  pos   the position
-	 * 
-	 * @return       <code>true</code> if the test is passed, <code>false</code>
-	 *                   otherwise.
+	 *
+	 * @param state the state about to be placed
+	 * @param world the world
+	 * @param pos   the position
+	 *
+	 * @return <code>true</code> if the test is passed, <code>false</code>
+	 *             otherwise.
 	 */
 	public abstract boolean test(BlockState state, World world, BlockPos pos);
 
@@ -45,16 +45,16 @@ public abstract class BlockStayCondition {
 
 	static {
 		UNAMED_MAP.put("block_predicate", json -> {
-			JsonArray offsetArray = JsonHelper.getArray(json, "offset");
+			final JsonArray offsetArray = JsonHelper.getArray(json, "offset");
 			if (offsetArray.size() != 3) throw new JsonParseException("invalid offset array: length must be equals to 3");
 
 			// @formatter:off
-			Vec3i offset = new Vec3i(	JsonHelper.asInt(offsetArray.get(0), "offset[0]"),
+			final Vec3i offset = new Vec3i(	JsonHelper.asInt(offsetArray.get(0), "offset[0]"),
 										JsonHelper.asInt(offsetArray.get(1), "offset[1]"),
 										JsonHelper.asInt(offsetArray.get(2), "offset[2]"));
 			// @formatter:on
 
-			String predicateStr = JsonHelper.getString(json, "predicate");
+			final String predicateStr = JsonHelper.getString(json, "predicate");
 
 			return new BlockPredicateCondition(offset, BlockPredicateArgumentType.blockPredicate().parse(new StringReader(predicateStr)));
 		});
@@ -62,14 +62,14 @@ public abstract class BlockStayCondition {
 
 	/**
 	 * Converts the given {@link JsonObject} into a {@link BlockStayCondition}
-	 * 
-	 * @param  jsonCondition      the serialized condition
-	 * 
-	 * @return                    a {@link BlockStayCondition} condition
-	 * 
+	 *
+	 * @param jsonCondition the serialized condition
+	 *
+	 * @return a {@link BlockStayCondition} condition
+	 *
 	 * @throws JsonParseException if any syntax errors occurs
 	 */
-	public static BlockStayCondition parseCondition(JsonObject jsonCondition) throws JsonParseException {
+	public static BlockStayCondition parseCondition(final JsonObject jsonCondition) throws JsonParseException {
 		final String conditionName = JsonHelper.getString(jsonCondition, "condition");
 		final ConditionDeserializer deserializer = UNAMED_MAP.get(conditionName);
 
@@ -78,11 +78,11 @@ public abstract class BlockStayCondition {
 		} else {
 			int len = 1;
 			// all condition including null if no extra conditions
-			BlockStayCondition[] conditions = new BlockStayCondition[4];
+			final BlockStayCondition[] conditions = new BlockStayCondition[4];
 
 			try {
 				conditions[0] = deserializer.deserialize(jsonCondition);
-			} catch (CommandSyntaxException e) {
+			} catch (final CommandSyntaxException e) {
 				throw new JsonSyntaxException(e);
 			}
 
@@ -141,34 +141,34 @@ public abstract class BlockStayCondition {
 
 	/**
 	 * Creates a compound AND condition
-	 * 
-	 * @param  conditions the conditions
-	 * 
+	 *
+	 * @param conditions the conditions
+	 *
 	 * @return
 	 */
-	public static BlockStayCondition createCompoundAND(BlockStayCondition... conditions) {
+	public static BlockStayCondition createCompoundAND(final BlockStayCondition... conditions) {
 		return new CompoundBlockStayCondition.AND_Condition(conditions);
 	}
 
 	/**
 	 * Creates a compound OR condition
-	 * 
-	 * @param  conditions the conditions
-	 * 
+	 *
+	 * @param conditions the conditions
+	 *
 	 * @return
 	 */
-	public static BlockStayCondition createCompoundOR(BlockStayCondition... conditions) {
+	public static BlockStayCondition createCompoundOR(final BlockStayCondition... conditions) {
 		return new CompoundBlockStayCondition.OR_Condition(conditions);
 	}
 
 	/**
 	 * Creates a compound XOR condition
-	 * 
-	 * @param  conditions the conditions
-	 * 
+	 *
+	 * @param conditions the conditions
+	 *
 	 * @return
 	 */
-	public static BlockStayCondition createCompoundXOR(BlockStayCondition... conditions) {
+	public static BlockStayCondition createCompoundXOR(final BlockStayCondition... conditions) {
 		return new CompoundBlockStayCondition.XOR_Condition(conditions);
 	}
 
@@ -176,7 +176,7 @@ public abstract class BlockStayCondition {
 	 * The functional interface for deserializing {@link BlockStayCondition}
 	 */
 	@FunctionalInterface
-	static interface ConditionDeserializer {
+	interface ConditionDeserializer {
 
 		BlockStayCondition deserialize(
 				JsonObject json) throws JsonParseException, InvalidIdentifierException, CommandSyntaxException;

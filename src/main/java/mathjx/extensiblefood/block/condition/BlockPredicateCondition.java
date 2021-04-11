@@ -14,18 +14,16 @@ public final class BlockPredicateCondition extends BlockStayCondition {
 	private final Vec3i offset;
 	private final BlockPredicate predicate;
 
-	
-	public BlockPredicateCondition(Vec3i offset, BlockPredicate predicate) {
+	public BlockPredicateCondition(final Vec3i offset, final BlockPredicate predicate) {
 		this.offset = offset;
 		this.predicate = predicate;
 	}
 
-
 	@Override
-	public boolean test(BlockState state, World world, BlockPos pos) {
+	public boolean test(final BlockState state, final World world, final BlockPos pos) {
 		try {
 			return predicate.create(world.getTagManager()).test(new CachedBlockPosition(world, pos.add(offset), false));
-		} catch (CommandSyntaxException e) {
+		} catch (final CommandSyntaxException e) {
 			e.printStackTrace();
 			return false;
 		}

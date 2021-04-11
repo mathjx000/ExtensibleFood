@@ -19,36 +19,34 @@ import net.minecraft.util.registry.Registry;
 
 public final class FoodItemStringReader {
 
-	public static final DynamicCommandExceptionType NOT_FOOD_EXCEPTION = new DynamicCommandExceptionType((object) -> {
-		return new TranslatableText("argument.extensible_food.food_item.invalid", new Object[] { object });
-	});
+	public static final DynamicCommandExceptionType NOT_FOOD_EXCEPTION = new DynamicCommandExceptionType(object -> new TranslatableText("argument.extensible_food.food_item.invalid", object));
 
 	private final StringReader reader;
 	private Item item;
 
 	private boolean suggest = true;
 
-	public FoodItemStringReader(StringReader reader) {
+	public FoodItemStringReader(final StringReader reader) {
 		this.reader = reader;
 	}
 
 	public Item getItem() {
-		return this.item;
+		return item;
 	}
 
 	public void readItem() throws CommandSyntaxException {
-		int i = this.reader.getCursor();
-		Identifier identifier = Identifier.fromCommandInput(this.reader);
+		final int i = reader.getCursor();
+		final Identifier identifier = Identifier.fromCommandInput(reader);
 
-		Item item = Registry.ITEM.getOrEmpty(identifier).orElseThrow(() -> {
-			this.reader.setCursor(i);
-			return ID_INVALID_EXCEPTION.createWithContext(this.reader, identifier.toString());
+		final Item item = Registry.ITEM.getOrEmpty(identifier).orElseThrow(() -> {
+			reader.setCursor(i);
+			return ID_INVALID_EXCEPTION.createWithContext(reader, identifier.toString());
 		});
 		if (item.isFood()) {
 			this.item = item;
 		} else {
-			this.reader.setCursor(i);
-			throw NOT_FOOD_EXCEPTION.createWithContext(this.reader, identifier.toString());
+			reader.setCursor(i);
+			throw NOT_FOOD_EXCEPTION.createWithContext(reader, identifier.toString());
 		}
 	}
 
@@ -60,9 +58,9 @@ public final class FoodItemStringReader {
 		return this;
 	}
 
-	public CompletableFuture<Suggestions> getSuggestions(SuggestionsBuilder builder) {
+	public CompletableFuture<Suggestions> getSuggestions(final SuggestionsBuilder builder) {
 		if (suggest) {
-			Stream<Identifier> stream = Registry.ITEM.getEntries().stream().filter(e -> e.getValue().isFood()).map(e -> e.getKey().getValue());
+			final Stream<Identifier> stream = Registry.ITEM.getEntries().stream().filter(e -> e.getValue().isFood()).map(e -> e.getKey().getValue());
 			return CommandSource.suggestIdentifiers(stream, builder);
 		} else return builder.buildFuture();
 	}

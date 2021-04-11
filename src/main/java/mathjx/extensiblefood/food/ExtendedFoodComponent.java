@@ -10,8 +10,8 @@ public final class ExtendedFoodComponent {
 	public final Integer eatTime;
 	public final SoundEvent eatSound;
 
-	ExtendedFoodComponent(FoodComponent foodComponent, Integer eatTime, SoundEvent eatSound) {
-		this.food = foodComponent;
+	ExtendedFoodComponent(final FoodComponent foodComponent, final Integer eatTime, final SoundEvent eatSound) {
+		food = foodComponent;
 		this.eatTime = eatTime;
 		this.eatSound = eatSound;
 	}

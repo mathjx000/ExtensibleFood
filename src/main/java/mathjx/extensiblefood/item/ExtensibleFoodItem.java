@@ -5,7 +5,6 @@ import java.util.List;
 import mathjx.extensiblefood.food.ExtendedFoodComponent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.ComposterBlock;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -26,13 +25,13 @@ public final class ExtensibleFoodItem extends Item {
 
 	/*
 	 * Item food properties
-	 * 
+	 *
 	 * Used for eat time and sound
 	 */
 	private final ExtendedFoodComponent foodComponent;
 
-	public ExtensibleFoodItem(Settings settings, Text name, Text description, UseAction action, boolean glint,
-			Item foodRemainder, ExtendedFoodComponent foodComponent) {
+	public ExtensibleFoodItem(final Settings settings, final Text name, final Text description, final UseAction action,
+			final boolean glint, final Item foodRemainder, final ExtendedFoodComponent foodComponent) {
 		super(settings);
 
 		this.name = name;
@@ -46,51 +45,49 @@ public final class ExtensibleFoodItem extends Item {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public Text getName() {
-		return this.name;
+		return name;
 	}
 
 	@Override
-	public Text getName(ItemStack stack) {
-		return this.name;
+	public Text getName(final ItemStack stack) {
+		return name;
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
-		if (this.description != null) tooltip.add(this.description);
+	public void appendTooltip(final ItemStack stack, final World world, final List<Text> tooltip,
+			final TooltipContext context) {
+		if (description != null) tooltip.add(description);
 
 		super.appendTooltip(stack, world, tooltip, context);
 	}
 
 	@Override
-	public int getMaxUseTime(ItemStack stack) {
+	public int getMaxUseTime(final ItemStack stack) {
 		return foodComponent.eatTime == null ? super.getMaxUseTime(stack) : foodComponent.eatTime;
 	}
 
 	@Override
-	public UseAction getUseAction(ItemStack stack) {
-		return this.action;
+	public UseAction getUseAction(final ItemStack stack) {
+		return action;
 	}
 
 	@Override
-	public boolean hasGlint(ItemStack stack) {
-		return this.glint;
+	public boolean hasGlint(final ItemStack stack) {
+		return glint;
 	}
 
 	@Override
-	public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
-		ItemStack remaining = super.finishUsing(stack, world, user);
-		boolean p = user instanceof PlayerEntity;
+	public ItemStack finishUsing(final ItemStack stack, final World world, final LivingEntity user) {
+		final ItemStack remaining = super.finishUsing(stack, world, user);
+		final boolean p = user instanceof PlayerEntity;
 
-		if (p && ((PlayerEntity) user).abilities.creativeMode) {
-			return remaining;
-		} else if (this.foodRemainder != null) {
-			if (stack.isEmpty()) {
-				return new ItemStack(this.foodRemainder, 1);
-			} else if (p) {
+		if ((!p || !((PlayerEntity) user).abilities.creativeMode) && foodRemainder != null) {
+			if (stack.isEmpty()) return new ItemStack(foodRemainder, 1);
+			else if (p) {
 				remaining.increment(1);
-				return ItemUsage.method_30012(remaining, (PlayerEntity) user, new ItemStack(this.foodRemainder, 1));
-			} else user.dropStack(new ItemStack(this.foodRemainder, 1));
+				return ItemUsage.method_30012(remaining, (PlayerEntity) user, new ItemStack(foodRemainder, 1));
+			} else user.dropStack(new ItemStack(foodRemainder, 1));
 		}
 
 		return remaining;
@@ -104,15 +101,6 @@ public final class ExtensibleFoodItem extends Item {
 	@Override
 	public SoundEvent getEatSound() {
 		return foodComponent.eatSound == null ? super.getEatSound() : foodComponent.eatSound;
-	}
-
-	@Deprecated
-	void clear() {
-		// cleared = true;
-
-		ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.computeFloatIfPresent(this, (i, f) -> null);
-
-		// TODO clear the item
 	}
 
 }

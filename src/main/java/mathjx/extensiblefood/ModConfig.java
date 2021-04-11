@@ -40,7 +40,7 @@ public final class ModConfig {
 		if (Files.exists(MOD_CONFIG_FILE)) {
 			try (Reader reader = Files.newBufferedReader(MOD_CONFIG_FILE, StandardCharsets.UTF_8)) {
 				props.load(reader);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				LOGGER.error("Failed to load configuration file '" + MOD_CONFIG_FILE.toString() + "'", e);
 //				dirtyFlag.set(true);
 //				initDefaults(props);
@@ -68,14 +68,14 @@ public final class ModConfig {
 		if (dirtyFlag.get()) {
 			try (Writer writer = Files.newBufferedWriter(MOD_CONFIG_FILE, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
 				props.store(writer, "ExtensibleFood Mod Settings\nUse with care.\nWarning: Hosting a server with custom foods can produce unexpected results if the foods are not the same as the client.");
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				LOGGER.error("Failed to save configuration file '" + MOD_CONFIG_FILE.toString() + "'", e);
 			}
 		}
 	}
 
-	private static <T> T parseProperty(Properties props, String propertyName, Function<String, T> parser,
-			Supplier<String> ifAbsent, AtomicBoolean dirtyFlag) {
+	private static <T> T parseProperty(final Properties props, final String propertyName,
+			final Function<String, T> parser, final Supplier<String> ifAbsent, final AtomicBoolean dirtyFlag) {
 		String value;
 
 		if (!props.containsKey(propertyName)) {
@@ -89,7 +89,7 @@ public final class ModConfig {
 
 			try {
 				return parser.apply(value);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.error("Failed to parse config property '" + propertyName + "' with value '" + value
 						+ "', falling back to default: '" + (value = ifAbsent.get()) + "'", e);
 			}

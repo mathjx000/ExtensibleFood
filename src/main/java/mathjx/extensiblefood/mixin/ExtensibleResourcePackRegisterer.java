@@ -21,10 +21,11 @@ public final class ExtensibleResourcePackRegisterer {
 	private static final ResourcePackSource RESOURCE_PACK_SOURCE = ModResourcePackCreator.RESOURCE_PACK_SOURCE;
 
 	@Inject(method = "register", at = @At(value = "RETURN"))
-	public void register(Consumer<ResourcePackProfile> consumer, ResourcePackProfile.Factory factory, CallbackInfo cb) {
+	public void register(final Consumer<ResourcePackProfile> consumer, final ResourcePackProfile.Factory factory,
+			final CallbackInfo cb) {
 		@SuppressWarnings("resource")
-		UserExtensionResourcePack pack = new UserExtensionResourcePack();
-		ResourcePackProfile profile = ResourcePackProfile.of("fabric/" + MOD_ID
+		final UserExtensionResourcePack pack = new UserExtensionResourcePack();
+		final ResourcePackProfile profile = ResourcePackProfile.of("fabric/" + MOD_ID
 				+ "/user_extension", true, () -> pack, factory, InsertionPosition.TOP, RESOURCE_PACK_SOURCE);
 
 		consumer.accept(profile);

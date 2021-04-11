@@ -25,8 +25,8 @@ public final class FoodStatsTooltipHook {
 						target = "Lnet/minecraft/item/Item;appendTooltip(Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Ljava/util/List;Lnet/minecraft/client/item/TooltipContext;)V",
 						shift = Shift.AFTER),
 			locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-	private void getTooltipHook(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> cir,
-			List<Text> list, int i) {
+	private void getTooltipHook(final PlayerEntity player, final TooltipContext context,
+			final CallbackInfoReturnable<List<Text>> cir, final List<Text> list, final int i) {
 		if (ModConfig.displayFoodTooltipsBehavior > 0 || context.isAdvanced()) FoodTooltip.append((ItemStack) (Object) this, context, list);
 	}
 

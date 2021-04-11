@@ -34,7 +34,7 @@ public final class ErrorScreenGadget extends Screen {
 
 	private final OrderedText textMore;
 
-	public ErrorScreenGadget(Screen parent) {
+	public ErrorScreenGadget(final Screen parent) {
 		super(new TranslatableText("extensible_food.errorScreen.title"));
 
 		this.parent = parent;
@@ -46,22 +46,22 @@ public final class ErrorScreenGadget extends Screen {
 
 	@Override
 	protected void init() {
-		this.addButton(new ButtonWidget(this.width / 2 - 100, this.height / 6 + 168, 200, 20, ScreenTexts.BACK, btn -> this.client.openScreen(parent)));
+		this.addButton(new ButtonWidget(width / 2 - 100, height / 6 + 168, 200, 20, ScreenTexts.BACK, btn -> client.openScreen(parent)));
 	}
 
 	@Override
-	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+	public void render(final MatrixStack matrices, final int mouseX, final int mouseY, final float delta) {
 		this.renderBackground(matrices);
 
-		drawCenteredText(matrices, this.textRenderer, this.title, this.width / 2, 15, 0xFFFFFF);
+		drawCenteredText(matrices, textRenderer, title, width / 2, 15, 0xFFFFFF);
 
-		float x = (int) (this.width / 2 - maxWidth / 2);
+		final float x = width / 2 - maxWidth / 2;
 		float y = 45f;
-		int max = Math.min(entries.size(), maxLines);
+		final int max = Math.min(entries.size(), maxLines);
 		ReportEntry entry;
 
-		Matrix4f matrix4f = matrices.peek().getModel();
-		VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
+		final Matrix4f matrix4f = matrices.peek().getModel();
+		final VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
 
 		for (int i = 0; i < max; i++) {
 			entry = entries.get(i);
@@ -82,7 +82,7 @@ public final class ErrorScreenGadget extends Screen {
 	@Override
 	public void removed() {}
 
-	public static void report(Path file, Object... args) {
+	public static void report(final Path file, final Object... args) {
 		entries.add(new ReportEntry(file, args));
 	}
 
@@ -90,7 +90,7 @@ public final class ErrorScreenGadget extends Screen {
 		return !displayed && ModConfig.showModRelatedErrors && !entries.isEmpty();
 	}
 
-	public static void open(Screen parent) {
+	public static void open(final Screen parent) {
 		INSTANCE = new ErrorScreenGadget(parent);
 		MinecraftClient.getInstance().openScreen(INSTANCE);
 		displayed = true;
@@ -101,18 +101,18 @@ public final class ErrorScreenGadget extends Screen {
 		private final Text generatedMessage;
 		private final OrderedText generatedFileLocation;
 
-		ReportEntry(Path file, Object[] args) {
-			this.generatedMessage = new TranslatableText("extensible_food.errorScreen.error.message", args);
+		ReportEntry(Path file, final Object[] args) {
+			generatedMessage = new TranslatableText("extensible_food.errorScreen.error.message", args);
 
 			file = ExtensibleFood.MOD_CONFIG_DIR.relativize(file);
-			this.generatedFileLocation = new TranslatableText("extensible_food.errorScreen.error.location", file.toString().replace(file.getFileSystem().getSeparator(), "/")).setStyle(Style.EMPTY.withItalic(true)).asOrderedText();
+			generatedFileLocation = new TranslatableText("extensible_food.errorScreen.error.location", file.toString().replace(file.getFileSystem().getSeparator(), "/")).setStyle(Style.EMPTY.withItalic(true)).asOrderedText();
 		}
 
-		private float render(Matrix4f matrix4f, VertexConsumerProvider vertexConsumers, float x, float y,
-				TextRenderer textRenderer) {
+		private float render(final Matrix4f matrix4f, final VertexConsumerProvider vertexConsumers, final float x,
+				float y, final TextRenderer textRenderer) {
 			y += 1f;
 
-			for (OrderedText line : textRenderer.wrapLines(generatedMessage, maxWidth)) {
+			for (final OrderedText line : textRenderer.wrapLines(generatedMessage, maxWidth)) {
 				textRenderer.draw(line, x, y, 0xFF_A0_A0, false, matrix4f, vertexConsumers, false, 0x000000, 0xF000F0);
 				y += textRenderer.fontHeight;
 			}

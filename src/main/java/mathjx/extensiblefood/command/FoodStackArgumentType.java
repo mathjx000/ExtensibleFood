@@ -18,20 +18,21 @@ final class FoodStackArgumentType implements ArgumentType<ItemStackArgument> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("potato", "minecraft:sweet_berries");
 
 	@Override
-	public ItemStackArgument parse(StringReader reader) throws CommandSyntaxException {
-		FoodItemStringReader itemStringReader = new FoodItemStringReader(reader).consume();
+	public ItemStackArgument parse(final StringReader reader) throws CommandSyntaxException {
+		final FoodItemStringReader itemStringReader = new FoodItemStringReader(reader).consume();
 		return new ItemStackArgument(itemStringReader.getItem(), null);
 	}
 
 	@Override
-	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-		StringReader reader = new StringReader(builder.getInput());
+	public <S> CompletableFuture<Suggestions> listSuggestions(final CommandContext<S> context,
+			final SuggestionsBuilder builder) {
+		final StringReader reader = new StringReader(builder.getInput());
 		reader.setCursor(builder.getStart());
-		FoodItemStringReader stringReader = new FoodItemStringReader(reader);
+		final FoodItemStringReader stringReader = new FoodItemStringReader(reader);
 
 		try {
 			stringReader.consume();
-		} catch (CommandSyntaxException e) {}
+		} catch (final CommandSyntaxException e) {}
 
 		return stringReader.getSuggestions(builder);
 	}

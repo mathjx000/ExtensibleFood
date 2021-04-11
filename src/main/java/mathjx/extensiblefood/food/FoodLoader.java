@@ -1,5 +1,7 @@
 package mathjx.extensiblefood.food;
 
+import static mathjx.extensiblefood.ExtensibleFood.LOGGER;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -8,13 +10,17 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 
-import mathjx.extensiblefood.block.BlockDeserializer;
-import mathjx.extensiblefood.block.ExtensibleFoodBlock;
+import mathjx.extensiblefood.block.BlockParser;
+import mathjx.extensiblefood.block.ConsumableFoodBlock;
+import mathjx.extensiblefood.block.CropFoodBlock;
+import mathjx.extensiblefood.item.ExtensibleFoodBlockItem;
+import mathjx.extensiblefood.item.ExtensibleFoodCropItem;
 import mathjx.extensiblefood.item.ExtensibleFoodItem;
-import mathjx.extensiblefood.item.ExtensibleFoodItemBlock;
+import net.minecraft.block.Block;
 import net.minecraft.block.ComposterBlock;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -27,8 +33,6 @@ import net.minecraft.util.Rarity;
 import net.minecraft.util.UseAction;
 import net.minecraft.util.registry.Registry;
 
-import static mathjx.extensiblefood.ExtensibleFood.LOGGER;
-
 public final class FoodLoader {
 
 //	private final Gson gson;
@@ -38,7 +42,7 @@ public final class FoodLoader {
 //		this.gson = builder.create();
 	}
 
-	public void applyFood(JsonObject file, Identifier autoId) throws JsonParseException {
+	public void applyFood(final JsonObject file, final Identifier autoId) throws JsonParseException {
 		final ExtendedFoodComponent foodComponent = parseFoodComponent(JsonHelper.getObject(file, "food"));
 
 		final Item theItem;
@@ -46,7 +50,7 @@ public final class FoodLoader {
 			// then the item should be a BlockItem that can't be eaten directly like cake
 
 			final JsonObject jsonBlock = JsonHelper.getObject(file, "block");
-			final ExtensibleFoodBlock block = BlockDeserializer.deszerializeBlock(jsonBlock, foodComponent);
+			final Block block = BlockParser.parseBlock(jsonBlock, foodComponent);
 
 			theItem = parseItemBlock(JsonHelper.getObject(file, "item"), block);
 
@@ -67,15 +71,15 @@ public final class FoodLoader {
 	/**
 	 * Parse an extended {@link ExtendedFoodComponent foodComponent} from the given
 	 * {@link JsonObject}
-	 * 
-	 * @param  foodJson           the source JSON
-	 * 
+	 *
+	 * @param foodJson the source JSON
+	 *
 	 * @return
-	 * 
+	 *
 	 * @throws JsonParseException if any JSON syntax error is found
 	 */
-	ExtendedFoodComponent parseFoodComponent(JsonObject foodJson) throws JsonParseException {
-		FoodComponent.Builder builder = new FoodComponent.Builder();
+	ExtendedFoodComponent parseFoodComponent(final JsonObject foodJson) throws JsonParseException {
+		final FoodComponent.Builder builder = new FoodComponent.Builder();
 
 		Integer hunger = null;
 		Float saturation = null;
@@ -84,12 +88,12 @@ public final class FoodLoader {
 		SoundEvent itemEatSound;
 
 		if (foodJson.has("base")) { // then we need to copy all parameters of the given item
-			Item baseItem = JsonHelper.getItem(foodJson, "base");
+			final Item baseItem = JsonHelper.getItem(foodJson, "base");
 
 			if (!baseItem.isFood()) throw new JsonParseException("Invalid food base item '"
 					+ Registry.ITEM.getId(baseItem) + "', this item exists but it not a food");
 
-			FoodComponent base = baseItem.getFoodComponent();
+			final FoodComponent base = baseItem.getFoodComponent();
 
 			hunger = base.getHunger();
 			saturation = base.getSaturationModifier();
@@ -131,12 +135,12 @@ public final class FoodLoader {
 
 	/**
 	 * Parse a {@link StatusEffectInstance} from a JSON object
-	 * 
-	 * @param  object serialized effect
-	 * 
-	 * @return        an instance of the serialized effect
+	 *
+	 * @param object serialized effect
+	 *
+	 * @return an instance of the serialized effect
 	 */
-	private StatusEffectInstance parseEffect(JsonObject object) {
+	private StatusEffectInstance parseEffect(final JsonObject object) {
 		final String id = JsonHelper.getString(object, "id");
 		final StatusEffect effect = Registry.STATUS_EFFECT.getOrEmpty(new Identifier(id)).orElseThrow(() -> new JsonParseException("Expected id to be an item, was unknown string '"
 				+ id + '\''));
@@ -163,8 +167,8 @@ public final class FoodLoader {
 	//// FoodItem
 	//
 
-	ExtensibleFoodItem parseFoodItem(JsonObject jsonItem,
-			ExtendedFoodComponent foodComponent) throws JsonParseException {
+	ExtensibleFoodItem parseFoodItem(final JsonObject jsonItem,
+			final ExtendedFoodComponent foodComponent) throws JsonParseException {
 		final Item.Settings settings = new Item.Settings();
 
 		final UseAction itemUseAction;
@@ -191,14 +195,14 @@ public final class FoodLoader {
 
 		// register it to composter map if required
 		{
-			Float f = composterValueRef.get();
+			final Float f = composterValueRef.get();
 			if (f != null) ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.put(item, f.floatValue());
 		}
 
 		return item;
 	}
 
-	private ExtensibleFoodItemBlock parseItemBlock(JsonObject jsonItem, ExtensibleFoodBlock block) {
+	private BlockItem parseItemBlock(final JsonObject jsonItem, final Block block) {
 		final Item.Settings settings = new Item.Settings();
 
 		final AtomicReference<Text> nameRef = new AtomicReference<Text>(), descriptionRef = new AtomicReference<>(null);
@@ -207,32 +211,37 @@ public final class FoodLoader {
 
 		parseCommonItemProperties(jsonItem, settings, nameRef, descriptionRef, glintRef, composterValueRef);
 
-		final ExtensibleFoodItemBlock itemBlock = new ExtensibleFoodItemBlock(block, settings, nameRef.get(), descriptionRef.get(), glintRef.get());
+		final BlockItem blockItem;
+		if (block instanceof ConsumableFoodBlock) blockItem = new ExtensibleFoodBlockItem((ConsumableFoodBlock) block, settings, nameRef.get(), descriptionRef.get(), glintRef.get());
+		else if (block instanceof CropFoodBlock) {
+			blockItem = new ExtensibleFoodCropItem(block, settings, nameRef.get(), descriptionRef.get(), glintRef.get());
+			((CropFoodBlock) block).seedItem = blockItem;
+		} else throw new RuntimeException("Illeeegaaaal!");
 
 		// register to composter map if required
 		{
-			Float f = composterValueRef.get();
-			if (f != null) ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.put(itemBlock, f.floatValue());
+			final Float f = composterValueRef.get();
+			if (f != null) ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.put(blockItem, f.floatValue());
 		}
 
-		return itemBlock;
+		return blockItem;
 	}
 
-	private void parseCommonItemProperties(JsonObject jsonItem, Item.Settings settings, AtomicReference<Text> nameRef,
-			AtomicReference<Text> descriptionRef, AtomicBoolean glintRef,
-			AtomicReference<Float> composterValueRef) throws JsonParseException {
+	private void parseCommonItemProperties(final JsonObject jsonItem, final Item.Settings settings,
+			final AtomicReference<Text> nameRef, final AtomicReference<Text> descriptionRef,
+			final AtomicBoolean glintRef, final AtomicReference<Float> composterValueRef) throws JsonParseException {
 		// group
 		if (jsonItem.has("group")) {
 			final String groupName = JsonHelper.getString(jsonItem, "group");
 
-			for (ItemGroup group : ItemGroup.GROUPS) {
+			for (final ItemGroup group : ItemGroup.GROUPS) {
 				if (group.getName().equals(groupName)) {
 					settings.group(group);
 					break;
 				}
 			}
 
-			StringBuilder builder = new StringBuilder();
+			final StringBuilder builder = new StringBuilder();
 			builder.append("invalid item group '").append(groupName).append("\' valid values are : ( ");
 
 			final String s = " | ";
@@ -262,15 +271,15 @@ public final class FoodLoader {
 
 	/**
 	 * Converts the string representation of an {@link UseAction}.
-	 * 
-	 * @param  container          the object containing the property to parse
-	 * @param  fieldName          the property name
-	 * 
-	 * @return                    an {@link UseAction}
-	 * 
+	 *
+	 * @param container the object containing the property to parse
+	 * @param fieldName the property name
+	 *
+	 * @return an {@link UseAction}
+	 *
 	 * @throws JsonParseException if the action name is invalid
 	 */
-	private UseAction parseAction(JsonObject container, String fieldName) throws JsonParseException {
+	private UseAction parseAction(final JsonObject container, final String fieldName) throws JsonParseException {
 		final String val = JsonHelper.getString(container, fieldName);
 
 		switch (val) {
@@ -304,12 +313,12 @@ public final class FoodLoader {
 
 	/**
 	 * parse the string representation to a {@link Rarity} object
-	 * 
-	 * @param  container
-	 * @param  fieldName
-	 * 
-	 * @return                    the rarity object
-	 * 
+	 *
+	 * @param container
+	 * @param fieldName
+	 *
+	 * @return the rarity object
+	 *
 	 * @throws JsonParseException if the rarity name is invalid
 	 */
 	private Rarity parseRarity(final JsonObject container, final String fieldName) throws JsonParseException {
@@ -338,8 +347,8 @@ public final class FoodLoader {
 	//// #FoodItem
 	//
 
-	public static SoundEvent parseSoundEvent(String string) {
-		Identifier soundId = new Identifier(string);
+	public static SoundEvent parseSoundEvent(final String string) {
+		final Identifier soundId = new Identifier(string);
 
 		SoundEvent sound = Registry.SOUND_EVENT.get(soundId);
 		if (sound == null) sound = Registry.register(Registry.SOUND_EVENT, soundId, new SoundEvent(soundId));

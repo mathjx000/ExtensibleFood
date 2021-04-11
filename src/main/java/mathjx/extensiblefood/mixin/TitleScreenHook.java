@@ -15,7 +15,7 @@ import net.minecraft.client.gui.screen.TitleScreen;
 public final class TitleScreenHook {
 
 	@Inject(method = "init()V", at = @At("HEAD"))
-	private void init(CallbackInfo cb) {
+	private void init(final CallbackInfo cb) {
 		if (ErrorScreenGadget.shouldDisplay()) {
 			ErrorScreenGadget.open((TitleScreen) (Object) this);
 		}
