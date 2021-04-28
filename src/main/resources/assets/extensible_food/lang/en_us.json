@@ -5,7 +5,7 @@
 	"extensible_food.errorScreen.error.hidden": "%d more...",
 	"commands.extensible_food.foodinfo.info_header": "Food Informations for Item %s:",
 	"commands.extensible_food.foodinfo.entry_hunger": " - Hunger: %s",
-	"commands.extensible_food.foodinfo.entry_saturation": " - Saturation: %s",
+	"commands.extensible_food.foodinfo.entry_saturation": " - Saturation: %s (Real) | %s (Minecraft internal value)",
 	"commands.extensible_food.foodinfo.entry_meat": " - Meat: %s",
 	"commands.extensible_food.foodinfo.entry_alwaysEdible": " - Always Edible: %s",
 	"commands.extensible_food.foodinfo.entry_snack": " - Snack: %s",
@@ -19,6 +19,8 @@
 	"tooltip.extensible_food.saturation": "%s Saturation",
 	"tooltip.extensible_food.value.positive": "+%s",
 	"tooltip.extensible_food.value.negative": "-%s",
+	"tooltip.extensible_food.value.true": "true",
+	"tooltip.extensible_food.value.false": "false",
 	"tooltip.extensible_food.advanced": " Always Edible: %s, Meat: %s, Snack: %s",
 	"tooltip.extensible_food.advanced.more": " ..."
 }

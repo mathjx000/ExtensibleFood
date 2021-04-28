@@ -43,22 +43,27 @@ public final class FoodLoader {
 	}
 
 	public void applyFood(final JsonObject file, final Identifier autoId) throws JsonParseException {
-		final ExtendedFoodComponent foodComponent = parseFoodComponent(JsonHelper.getObject(file, "food"));
+		final ExtendedFoodComponent foodComponent = parseFoodComponent(JsonHelper.getObject(file, "food"), autoId);
 
-		final Item theItem;
+		Item theItem;
 		if (file.has("block")) {
-			// then the item should be a BlockItem that can't be eaten directly like cake
-
 			final JsonObject jsonBlock = JsonHelper.getObject(file, "block");
 			final Block block = BlockParser.parseBlock(jsonBlock, foodComponent);
 
-			theItem = parseItemBlock(JsonHelper.getObject(file, "item"), block);
+			if (block instanceof CropFoodBlock) {
+				if (jsonBlock.has("crop_item")) {
+					// then parse the crop item as a item block
+					Registry.register(Registry.ITEM, new Identifier(autoId.toString()
+							+ "_seeds"), parseItemBlock(JsonHelper.getObject(jsonBlock, "crop_item"), block));
+					theItem = null;
+				} else theItem = parseFoodItem(JsonHelper.getObject(file, "item"), foodComponent, block);
+			} else theItem = parseItemBlock(JsonHelper.getObject(file, "item"), block);
 
 			Registry.register(Registry.BLOCK, autoId, block);
 			LOGGER.debug("Registered block with id {}", autoId.toString());
-		} else {
-			theItem = parseFoodItem(JsonHelper.getObject(file, "item"), foodComponent);
-		}
+		} else theItem = null;
+
+		if (theItem == null) theItem = parseFoodItem(JsonHelper.getObject(file, "item"), foodComponent, null);
 
 		Registry.register(Registry.ITEM, autoId, theItem);
 		LOGGER.debug("Registered item with id {}", autoId.toString());
@@ -72,13 +77,15 @@ public final class FoodLoader {
 	 * Parse an extended {@link ExtendedFoodComponent foodComponent} from the given
 	 * {@link JsonObject}
 	 *
-	 * @param foodJson the source JSON
+	 * @param foodJson The source JSON
+	 * @param foodId   The food file identifier
 	 *
 	 * @return
 	 *
 	 * @throws JsonParseException if any JSON syntax error is found
 	 */
-	ExtendedFoodComponent parseFoodComponent(final JsonObject foodJson) throws JsonParseException {
+	ExtendedFoodComponent parseFoodComponent(final JsonObject foodJson,
+			final Identifier foodId) throws JsonParseException {
 		final FoodComponent.Builder builder = new FoodComponent.Builder();
 
 		Integer hunger = null;
@@ -115,8 +122,12 @@ public final class FoodLoader {
 		itemEatSound = foodJson.has("eat_sound")
 				? itemEatSound = parseSoundEvent(JsonHelper.getString(foodJson, "eat_sound")) : null;
 
+//		if (saturation > hunger) LOGGER.warn("The food '{}' has a saturation of {} which is greater than the maximum imposed by its hunger ({}). Saturation will be clamped to {}.", foodId.toString(), saturation, hunger, hunger);
+
 		builder.hunger(hunger);
-		builder.saturationModifier(saturation);
+		builder.saturationModifier(
+				// convert the real saturation value to the internal one
+				saturation / (float) hunger / 2f);
 		if (alwaysEdible) builder.alwaysEdible();
 		if (meat) builder.meat();
 		if (snack) builder.snack();
@@ -167,23 +178,23 @@ public final class FoodLoader {
 	//// FoodItem
 	//
 
-	ExtensibleFoodItem parseFoodItem(final JsonObject jsonItem,
-			final ExtendedFoodComponent foodComponent) throws JsonParseException {
+	Item parseFoodItem(final JsonObject jsonItem, final ExtendedFoodComponent foodComponent,
+			final Block block) throws JsonParseException {
 		final Item.Settings settings = new Item.Settings();
 
 		final UseAction itemUseAction;
-		final AtomicReference<Text> itemNameRef = new AtomicReference<Text>(),
-				itemDescriptionRef = new AtomicReference<>(null);
-		final AtomicBoolean itemGlintRef = new AtomicBoolean(false);
-		final AtomicReference<Float> composterValueRef = new AtomicReference<>(null);
+		final AtomicReference<Text> itemName_ref = new AtomicReference<Text>(),
+				itemDescription_ref = new AtomicReference<>(null);
+		final AtomicBoolean itemGlint_ref = new AtomicBoolean(false);
+		final AtomicReference<Float> composterValue_ref = new AtomicReference<>(null);
 		final Item itemConsumeRemainder;
 
-		parseCommonItemProperties(jsonItem, settings, itemNameRef, itemDescriptionRef, itemGlintRef, composterValueRef);
+		parseCommonItemProperties(jsonItem, settings, itemName_ref, itemDescription_ref, itemGlint_ref, composterValue_ref);
 
 		itemUseAction = jsonItem.has("action") ? parseAction(jsonItem, "action") : UseAction.EAT; // action
 
 		// remainder item after eaten
-		// TODO specification support
+		// TODO item specific data support
 		if (jsonItem.has("consume_remainder")) {
 			itemConsumeRemainder = JsonHelper.getItem(jsonItem, "consume_remainder");
 		} else itemConsumeRemainder = null;
@@ -191,11 +202,13 @@ public final class FoodLoader {
 		settings.food(foodComponent.food);
 
 		// Build the item
-		final ExtensibleFoodItem item = new ExtensibleFoodItem(settings, itemNameRef.get(), itemDescriptionRef.get(), itemUseAction, itemGlintRef.get(), itemConsumeRemainder, foodComponent);
+		final Item item = block == null
+				? new ExtensibleFoodItem(settings, itemName_ref.get(), itemDescription_ref.get(), itemUseAction, itemGlint_ref.get(), itemConsumeRemainder, foodComponent)
+				: new ExtensibleFoodCropItem(block, settings, itemName_ref.get(), itemDescription_ref.get(), itemGlint_ref.get(), itemUseAction, itemConsumeRemainder, foodComponent);
 
 		// register it to composter map if required
 		{
-			final Float f = composterValueRef.get();
+			final Float f = composterValue_ref.get();
 			if (f != null) ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.put(item, f.floatValue());
 		}
 
@@ -205,22 +218,23 @@ public final class FoodLoader {
 	private BlockItem parseItemBlock(final JsonObject jsonItem, final Block block) {
 		final Item.Settings settings = new Item.Settings();
 
-		final AtomicReference<Text> nameRef = new AtomicReference<Text>(), descriptionRef = new AtomicReference<>(null);
-		final AtomicBoolean glintRef = new AtomicBoolean(false);
-		final AtomicReference<Float> composterValueRef = new AtomicReference<>(null);
+		final AtomicReference<Text> name_ref = new AtomicReference<Text>(),
+				descriptionRef = new AtomicReference<>(null);
+		final AtomicBoolean glint_ref = new AtomicBoolean(false);
+		final AtomicReference<Float> composterValue_ref = new AtomicReference<>(null);
 
-		parseCommonItemProperties(jsonItem, settings, nameRef, descriptionRef, glintRef, composterValueRef);
+		parseCommonItemProperties(jsonItem, settings, name_ref, descriptionRef, glint_ref, composterValue_ref);
 
 		final BlockItem blockItem;
-		if (block instanceof ConsumableFoodBlock) blockItem = new ExtensibleFoodBlockItem((ConsumableFoodBlock) block, settings, nameRef.get(), descriptionRef.get(), glintRef.get());
+		if (block instanceof ConsumableFoodBlock) blockItem = new ExtensibleFoodBlockItem((ConsumableFoodBlock) block, settings, name_ref.get(), descriptionRef.get(), glint_ref.get());
 		else if (block instanceof CropFoodBlock) {
-			blockItem = new ExtensibleFoodCropItem(block, settings, nameRef.get(), descriptionRef.get(), glintRef.get());
+			blockItem = new ExtensibleFoodCropItem(block, settings, name_ref.get(), descriptionRef.get(), glint_ref.get(), null, null, null);
 			((CropFoodBlock) block).seedItem = blockItem;
 		} else throw new RuntimeException("Illeeegaaaal!");
 
 		// register to composter map if required
 		{
-			final Float f = composterValueRef.get();
+			final Float f = composterValue_ref.get();
 			if (f != null) ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.put(blockItem, f.floatValue());
 		}
 
@@ -228,16 +242,16 @@ public final class FoodLoader {
 	}
 
 	private void parseCommonItemProperties(final JsonObject jsonItem, final Item.Settings settings,
-			final AtomicReference<Text> nameRef, final AtomicReference<Text> descriptionRef,
-			final AtomicBoolean glintRef, final AtomicReference<Float> composterValueRef) throws JsonParseException {
+			final AtomicReference<Text> name_ref, final AtomicReference<Text> description_ref,
+			final AtomicBoolean glint_ref, final AtomicReference<Float> composterValue_ref) throws JsonParseException {
 		// group
-		if (jsonItem.has("group")) {
+		group: if (jsonItem.has("group")) {
 			final String groupName = JsonHelper.getString(jsonItem, "group");
 
 			for (final ItemGroup group : ItemGroup.GROUPS) {
-				if (group.getName().equals(groupName)) {
+				if (group.getName().equalsIgnoreCase(groupName)) {
 					settings.group(group);
-					break;
+					break group;
 				}
 			}
 
@@ -254,19 +268,19 @@ public final class FoodLoader {
 
 		if (jsonItem.has("max_count")) settings.maxCount(JsonHelper.getInt(jsonItem, "max_count")); // maxCount key
 		if (!jsonItem.has("name")) throw new JsonSyntaxException("Missing name, expected to find a json text element");
-		nameRef.set(Text.Serializer.fromJson(jsonItem.get("name"))); // name
-		descriptionRef.set(jsonItem.has("description")
+		name_ref.set(Text.Serializer.fromJson(jsonItem.get("name"))); // name
+		description_ref.set(jsonItem.has("description")
 				? Text.Serializer.fromJson(jsonItem.get("description")).formatted(Formatting.GRAY) : null); // description
 
 		if (jsonItem.has("rarity")) settings.rarity(parseRarity(jsonItem, "rarity")); // rarity
 
-		glintRef.set(JsonHelper.getBoolean(jsonItem, "glint", false)); // glint
+		glint_ref.set(JsonHelper.getBoolean(jsonItem, "glint", false)); // glint
 		if (JsonHelper.getBoolean(jsonItem, "fireproof", false)) settings.fireproof(); // fire resistant
 
 		// remainder item after used in a craft
 		if (jsonItem.has("recipe_remainder")) settings.recipeRemainder(JsonHelper.getItem(jsonItem, "recipe_remainder"));
 
-		if (jsonItem.has("composter")) composterValueRef.set(JsonHelper.getFloat(jsonItem, "composter"));
+		if (jsonItem.has("composter")) composterValue_ref.set(JsonHelper.getFloat(jsonItem, "composter"));
 	}
 
 	/**

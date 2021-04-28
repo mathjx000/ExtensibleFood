@@ -1,6 +1,16 @@
 package mathjx.extensiblefood.block;
 
+import static mathjx.extensiblefood.ExtensibleFood.CLIENT;
 import static mathjx.extensiblefood.ExtensibleFood.LOGGER;
+import static net.minecraft.util.JsonHelper.asFloat;
+import static net.minecraft.util.JsonHelper.asObject;
+import static net.minecraft.util.JsonHelper.asString;
+import static net.minecraft.util.JsonHelper.getBoolean;
+import static net.minecraft.util.JsonHelper.getFloat;
+import static net.minecraft.util.JsonHelper.getInt;
+import static net.minecraft.util.JsonHelper.getObject;
+import static net.minecraft.util.JsonHelper.getString;
+import static net.minecraft.util.JsonHelper.isNumber;
 
 import java.util.Locale;
 
@@ -15,18 +25,18 @@ import mathjx.extensiblefood.block.condition.BlockStayCondition;
 import mathjx.extensiblefood.block.particle.ParticleEmission;
 import mathjx.extensiblefood.food.ExtendedFoodComponent;
 import mathjx.extensiblefood.food.FoodLoader;
+import mathjx.extensiblefood.mixin.RenderLayerAccess;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Material;
 import net.minecraft.block.MaterialColor;
 import net.minecraft.block.piston.PistonBehavior;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.DyeColor;
-import net.minecraft.util.JsonHelper;
 import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
 
 public final class BlockParser {
 
@@ -43,7 +53,7 @@ public final class BlockParser {
 			if (!jsonBlock.has("type")) {
 				LOGGER.warn("Missing " + "type" + ", expected to find String 'consumable' or 'crop'");
 				type = BlockType.CONSUMABLE;
-			} else switch (JsonHelper.getString(jsonBlock, "type")) {
+			} else switch (getString(jsonBlock, "type")) {
 				case "consumable":
 					type = BlockType.CONSUMABLE;
 					break;
@@ -69,17 +79,17 @@ public final class BlockParser {
 		final AbstractBlock.Settings settings = AbstractBlock.Settings.of(material);
 
 		if (jsonBlock.has("sounds")) {
-			final JsonObject soundObj = JsonHelper.getObject(jsonBlock, "sounds");
+			final JsonObject soundObj = getObject(jsonBlock, "sounds");
 			// @formatter:off
 			settings.sounds(new BlockSoundGroup(
-					JsonHelper.getFloat(soundObj, "volume", 1f),
-					JsonHelper.getFloat(soundObj, "pitch", 1f),
+					getFloat(soundObj, "volume", 1f),
+					getFloat(soundObj, "pitch", 1f),
 
-					FoodLoader.parseSoundEvent(JsonHelper.getString(soundObj, "break_sound")),
-					FoodLoader.parseSoundEvent(JsonHelper.getString(soundObj, "step_sound")),
-					FoodLoader.parseSoundEvent(JsonHelper.getString(soundObj, "place_sound")),
-					FoodLoader.parseSoundEvent(JsonHelper.getString(soundObj, "hit_sound")),
-					FoodLoader.parseSoundEvent(JsonHelper.getString(soundObj, "fall_sound"))
+					FoodLoader.parseSoundEvent(getString(soundObj, "break_sound")),
+					FoodLoader.parseSoundEvent(getString(soundObj, "step_sound")),
+					FoodLoader.parseSoundEvent(getString(soundObj, "place_sound")),
+					FoodLoader.parseSoundEvent(getString(soundObj, "hit_sound")),
+					FoodLoader.parseSoundEvent(getString(soundObj, "fall_sound"))
 				));
 			// @formatter:on
 		} else if (type == BlockType.CROP) settings.sounds(BlockSoundGroup.CROP);
@@ -98,13 +108,13 @@ public final class BlockParser {
 					final BlockStayCondition[] conditions = new BlockStayCondition[len];
 
 					for (int i = 0; i < len; i++) {
-						conditions[i] = BlockStayCondition.parseCondition(JsonHelper.asObject(array.get(i), "placement_conditions["
+						conditions[i] = BlockStayCondition.parseCondition(asObject(array.get(i), "placement_conditions["
 								+ i + '\''));
 					}
 
 					stayCondition = BlockStayCondition.createCompoundAND(conditions);
 				}
-			} else stayCondition = BlockStayCondition.parseCondition(JsonHelper.asObject(jsonCondition, "placement_conditions"));
+			} else stayCondition = BlockStayCondition.parseCondition(asObject(jsonCondition, "placement_conditions"));
 		} else stayCondition = null;
 
 		final ParticleEmission particleEmission = jsonBlock.has("particles")
@@ -113,17 +123,50 @@ public final class BlockParser {
 		final CollisionEffect collisionEffect = jsonBlock.has("collision_effects")
 				? CollisionEffect.parseCollisionEffect(jsonBlock.get("collision_effects")) : null;
 
+		RenderLayer renderLayer;
+		if (CLIENT && jsonBlock.has("render_mode")) {
+			switch (asString(jsonBlock, "render_mode").toLowerCase(Locale.ROOT)) {
+				case "cutout":
+					renderLayer = RenderLayer.getCutout();
+					break;
+
+				case "cutout_mipped":
+					renderLayer = RenderLayer.getCutoutMipped();
+					break;
+
+				case "translucent":
+					renderLayer = RenderLayer.getTranslucent();
+					break;
+
+				case "solid":
+					renderLayer = RenderLayer.getSolid();
+					break;
+
+				default:
+					throw new JsonSyntaxException("Unexpected render_mode, expected string 'cutout', 'cutout_mipped', 'translucent' and 'solid'");
+			}
+		} else renderLayer = null;
+
+		Block constructed;
 		// parse type specific properties
 		switch (type) {
 			case CONSUMABLE:
-				return parseConsumableFoodBlock(jsonBlock, settings, foodComponent, stayCondition, particleEmission, collisionEffect);
+				constructed = parseConsumableFoodBlock(jsonBlock, settings, foodComponent, stayCondition, particleEmission, collisionEffect);
+				break;
 
 			case CROP:
-				return parseCropFoodBlock(jsonBlock, settings.noCollision().ticksRandomly(), foodComponent, stayCondition, particleEmission, collisionEffect);
+				constructed = parseCropFoodBlock(jsonBlock, settings.noCollision().ticksRandomly(), foodComponent, stayCondition, particleEmission, collisionEffect);
+				if (CLIENT && renderLayer == null) renderLayer = RenderLayer.getCutout();
+
+				break;
 
 			default:
 				throw new RuntimeException("Illeeegaaaal!");
 		}
+
+		if (renderLayer != null) RenderLayerAccess.getBlocksMappedLayers().put(constructed, renderLayer);
+
+		return constructed;
 	}
 
 	private static ConsumableFoodBlock parseConsumableFoodBlock(final JsonObject jsonBlock,
@@ -134,21 +177,20 @@ public final class BlockParser {
 			parseBlockStrength(settings, jsonBlock.get("strength"));
 		} else throw new JsonSyntaxException("Missing " + "strength" + ", expected to find an Object or a Float");
 
-		if (jsonBlock.has("slipperiness")) settings.slipperiness(JsonHelper.getFloat(jsonBlock, "slipperiness"));
-		if (jsonBlock.has("velocity_multiplier")) settings.velocityMultiplier(JsonHelper.getFloat(jsonBlock, "velocity_multiplier"));
-		if (jsonBlock.has("jump_velocity_multiplier")) settings.jumpVelocityMultiplier(JsonHelper.getFloat(jsonBlock, "jump_velocity_multiplier"));
+		if (jsonBlock.has("slipperiness")) settings.slipperiness(getFloat(jsonBlock, "slipperiness"));
+		if (jsonBlock.has("velocity_multiplier")) settings.velocityMultiplier(getFloat(jsonBlock, "velocity_multiplier"));
+		if (jsonBlock.has("jump_velocity_multiplier")) settings.jumpVelocityMultiplier(getFloat(jsonBlock, "jump_velocity_multiplier"));
 
-		if (JsonHelper.getBoolean(jsonBlock, "require_tool", false)) settings.requiresTool();
+		if (getBoolean(jsonBlock, "require_tool", false)) settings.requiresTool();
 
-		final int bites = JsonHelper.getInt(jsonBlock, "bites");
+		final int bites = getInt(jsonBlock, "bites");
 		final IntProperty propertyBites = IntProperty.of("bites", 0, bites);
 
-		final VoxelShape[] bitesToShape = new VoxelShape[bites + 1];
-		parseShapes(bitesToShape, JsonHelper.getObject(jsonBlock, "shapes"));
+		final VoxelShape[] bitesToShape = BlockShapeParser.parseShapes(getObject(jsonBlock, "shapes"), bites + 1);
 
-		if (jsonBlock.has("lights")) parseLightingValues(settings, bites + 1, JsonHelper.getObject(jsonBlock, "lights"), propertyBites);
+		if (jsonBlock.has("lights")) parseLightingValues(settings, bites + 1, getObject(jsonBlock, "lights"), propertyBites);
 
-		return new ConsumableFoodBlock(settings, bites, BRUH = propertyBites, bitesToShape, JsonHelper.getBoolean(jsonBlock, "comparator_enabled", true), foodComponent, stayCondition, particleEmission, collisionEffect);
+		return new ConsumableFoodBlock(settings, bites, BRUH = propertyBites, bitesToShape, getBoolean(jsonBlock, "comparator_enabled", true), foodComponent, stayCondition, particleEmission, collisionEffect);
 	}
 
 	private static CropFoodBlock parseCropFoodBlock(final JsonObject jsonBlock, final AbstractBlock.Settings settings,
@@ -158,18 +200,17 @@ public final class BlockParser {
 			parseBlockStrength(settings, jsonBlock.get("strength"));
 		} else settings.breakInstantly();
 
-		final int maxAge = JsonHelper.getInt(jsonBlock, "max_age");
+		final int maxAge = getInt(jsonBlock, "max_age");
 		final IntProperty propertyAge = IntProperty.of("age", 0, maxAge);
 
-		final int minLight = checkLightRange(JsonHelper.getInt(jsonBlock, "minimum_light", 9), "minimum_light");
-		final int maxLight = checkLightRange(JsonHelper.getInt(jsonBlock, "maximum_light", 15), "maximum_light");
+		final int minLight = checkLightRange(getInt(jsonBlock, "minimum_light", 9), "minimum_light");
+		final int maxLight = checkLightRange(getInt(jsonBlock, "maximum_light", 15), "maximum_light");
 
-		final VoxelShape[] agesToShape = new VoxelShape[maxAge + 1];
-		parseShapes(agesToShape, JsonHelper.getObject(jsonBlock, "shapes"));
+		final VoxelShape[] agesToShape = BlockShapeParser.parseShapes(getObject(jsonBlock, "shapes"), maxAge + 1);
 
-		if (jsonBlock.has("lights")) parseLightingValues(settings, maxAge + 1, JsonHelper.getObject(jsonBlock, "lights"), propertyAge);
+		if (jsonBlock.has("lights")) parseLightingValues(settings, maxAge + 1, getObject(jsonBlock, "lights"), propertyAge);
 		BRUH = propertyAge;
-		return new CropFoodBlock(settings, maxAge, JsonHelper.getBoolean(jsonBlock, "fertilizable", true), minLight, maxLight, propertyAge, agesToShape, stayCondition, particleEmission, collisionEffect);
+		return new CropFoodBlock(settings, maxAge, getBoolean(jsonBlock, "fertilizable", true), minLight, maxLight, propertyAge, agesToShape, stayCondition, particleEmission, collisionEffect);
 	}
 
 	/**
@@ -182,34 +223,11 @@ public final class BlockParser {
 	 */
 	private static void parseBlockStrength(final AbstractBlock.Settings settings,
 			final JsonElement element) throws JsonSyntaxException {
-		if (JsonHelper.isNumber(element)) settings.strength(JsonHelper.asFloat(element, "strength"));
+		if (isNumber(element)) settings.strength(asFloat(element, "strength"));
 		else {
-			final JsonObject object = JsonHelper.asObject(element, "strength");
+			final JsonObject object = asObject(element, "strength");
 
-			settings.strength(JsonHelper.getFloat(object, "hardness"), JsonHelper.getFloat(object, "resistance"));
-		}
-	}
-
-	/**
-	 * Parses block {@link VoxelShape} array.
-	 *
-	 * @param shapesRef  The shape array to fill in
-	 * @param jsonShapes The shape data to read from
-	 *
-	 * @throws JsonSyntaxException If any parsing error occurs
-	 */
-	private static void parseShapes(final VoxelShape[] shapesRef,
-			final JsonObject jsonShapes) throws JsonSyntaxException {
-		final VoxelShape defaultShape = jsonShapes.has("default")
-				? BlockShapeParser.parseStateShape(JsonHelper.getObject(jsonShapes, "default"), "default")
-				: VoxelShapes.empty();
-
-		for (int i = 0; i < shapesRef.length; i++) {
-			final String blockStateName = Integer.toString(i);
-			if (jsonShapes.has(blockStateName)) {
-				shapesRef[i] = BlockShapeParser.parseStateShape(jsonShapes.get(blockStateName), "shapes["
-						+ blockStateName + ']');
-			} else shapesRef[i] = defaultShape;
+			settings.strength(getFloat(object, "hardness"), getFloat(object, "resistance"));
 		}
 	}
 
@@ -227,13 +245,13 @@ public final class BlockParser {
 	private static void parseLightingValues(final AbstractBlock.Settings settings, final int expectedValuesCount,
 			final JsonObject jsonLights, final IntProperty stateProperty2LightValue) throws JsonSyntaxException {
 
-		final int defaultValue = JsonHelper.getInt(jsonLights, "default", 0);
+		final int defaultValue = getInt(jsonLights, "default", 0);
 		final int[] values = new int[expectedValuesCount];
 
 		for (int i = 0; i < expectedValuesCount; i++) {
 			final String name = Integer.toString(i);
 
-			values[i] = checkLightRange(JsonHelper.getInt(jsonLights, name, defaultValue), name);
+			values[i] = checkLightRange(getInt(jsonLights, name, defaultValue), name);
 		}
 
 		settings.luminance(s -> values[s.get(stateProperty2LightValue)]);
@@ -387,11 +405,11 @@ public final class BlockParser {
 					throw new JsonParseException("Unknown material '" + materialName + '\'');
 			}
 		} else {
-			final JsonObject object = JsonHelper.asObject(jsonMaterial, "material");
+			final JsonObject object = asObject(jsonMaterial, "material");
 
 			MaterialColor color;
 			{
-				String materialIdentifier = JsonHelper.getString(object, "color");
+				String materialIdentifier = getString(object, "color");
 
 				final String dyePrefix = "dye//";
 				if (materialIdentifier.startsWith(dyePrefix)) {
@@ -403,14 +421,14 @@ public final class BlockParser {
 
 					color = dye.getMaterialColor();
 				} else {
-					// TODO
+					// TODO custom dye color
 					throw new UnsupportedOperationException("Not yet implement");
 				}
 			}
 
 			PistonBehavior pistonBehavior = PistonBehavior.NORMAL;
 			if (object.has("piston_behavior")) {
-				final String behavior = JsonHelper.getString(object, "piston_behavior");
+				final String behavior = getString(object, "piston_behavior");
 
 				switch (behavior.toLowerCase(Locale.ROOT)) {
 					case "normal":
@@ -438,7 +456,7 @@ public final class BlockParser {
 				}
 			}
 
-			return new Material(color, false, JsonHelper.getBoolean(object, "solid", true), JsonHelper.getBoolean(object, "blocks_movement", true), JsonHelper.getBoolean(object, "block_light", false), JsonHelper.getBoolean(object, "break_by_hand", true), JsonHelper.getBoolean(object, "burnable", false), pistonBehavior);
+			return new Material(color, false, getBoolean(object, "solid", true), getBoolean(object, "blocks_movement", true), getBoolean(object, "block_light", false), getBoolean(object, "break_by_hand", true), getBoolean(object, "burnable", false), pistonBehavior);
 		}
 	}
 

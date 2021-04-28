@@ -40,6 +40,10 @@ public final class ExtensibleFood implements ModInitializer {
 	 */
 	public static final Logger LOGGER = LogManager.getLogger(ExtensibleFood.class);
 	/**
+	 * <code>true</code> if the game is a client instance
+	 */
+	public static final boolean CLIENT = FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
+	/**
 	 * The mod container
 	 */
 	public static final ModContainer CONTAINER = FabricLoader.getInstance().getModContainer(MOD_ID).get();

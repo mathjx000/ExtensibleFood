@@ -88,13 +88,6 @@ public final class CropFoodBlock extends CropBlock {
 		return ageToShape[state.get(getAgeProperty())];
 	}
 
-//	@Override
-//	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand,
-//			BlockHitResult hit) {
-//		// TODO Auto-generated method stub
-//		return super.onUse(state, world, pos, player, hand, hit);
-//	}
-
 	@Override
 	public void onEntityCollision(final BlockState state, final World world, final BlockPos pos, final Entity entity) {
 		if (collisionEffect != null) collisionEffect.onEntityCollision(state, world, pos, entity);

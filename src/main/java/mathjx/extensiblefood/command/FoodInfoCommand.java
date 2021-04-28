@@ -11,6 +11,7 @@ import net.minecraft.command.argument.ItemStackArgumentType;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
@@ -32,7 +33,7 @@ public final class FoodInfoCommand {
 
 			lines.add(new TranslatableText("commands.extensible_food.foodinfo.info_header", arg.createStack(1, false).toHoverableText()));
 			lines.add(new TranslatableText("commands.extensible_food.foodinfo.entry_hunger", createNumberText(component.getHunger())));
-			lines.add(new TranslatableText("commands.extensible_food.foodinfo.entry_saturation", createNumberText(component.getSaturationModifier())));
+			lines.add(new TranslatableText("commands.extensible_food.foodinfo.entry_saturation", createNumberText(component.getHunger() * component.getSaturationModifier() * 2f), createNumberText(component.getSaturationModifier())));
 			lines.add(new TranslatableText("commands.extensible_food.foodinfo.entry_meat", createBooleanText(component.isMeat())));
 			lines.add(new TranslatableText("commands.extensible_food.foodinfo.entry_alwaysEdible", createBooleanText(component.isAlwaysEdible())));
 			lines.add(new TranslatableText("commands.extensible_food.foodinfo.entry_snack", createBooleanText(component.isSnack())));
@@ -49,7 +50,7 @@ public final class FoodInfoCommand {
 	}
 
 	private static Text createNumberText(final Object arg) {
-		return new LiteralText(arg.toString()).setStyle(Style.EMPTY.withColor(Formatting.AQUA));
+		return new LiteralText(ItemStack.MODIFIER_FORMAT.format(arg)).setStyle(Style.EMPTY.withColor(Formatting.AQUA));
 	}
 
 	public static Text createBooleanText(final boolean bool) {

@@ -3,7 +3,6 @@ package mathjx.extensiblefood.item;
 import java.util.List;
 
 import mathjx.extensiblefood.ModConfig;
-import mathjx.extensiblefood.command.FoodInfoCommand;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
@@ -19,6 +18,9 @@ public final class FoodTooltip {
 	private static final Text HEADER_TEXT = new TranslatableText("tooltip.extensible_food.header").formatted(Formatting.GRAY);
 	private static final Text ADVANCED_MORE_TEXT = new TranslatableText("tooltip.extensible_food.advanced.more").formatted(Formatting.GRAY);
 
+	private static final Text BOOLEAN_TRUE_TEXT = new TranslatableText("tooltip.extensible_food.value.true").formatted(Formatting.GREEN);
+	private static final Text BOOLEAN_FALSE_TEXT = new TranslatableText("tooltip.extensible_food.value.false").formatted(Formatting.RED);
+
 	public static void append(final ItemStack stack, final TooltipContext context, final List<Text> list) {
 		final Item item = stack.getItem();
 
@@ -29,10 +31,10 @@ public final class FoodTooltip {
 
 			list.add(HEADER_TEXT);
 			list.add(new TranslatableText("tooltip.extensible_food.hunger", formatFloatingValue(food.getHunger() / 2D)).formatted(Formatting.BLUE));
-			list.add(new TranslatableText("tooltip.extensible_food.saturation", formatFloatingValue(food.getSaturationModifier())).formatted(Formatting.DARK_GREEN));
+			list.add(new TranslatableText("tooltip.extensible_food.saturation", formatFloatingValue(food.getSaturationModifier() * food.getHunger() * 2f)).formatted(Formatting.DARK_GREEN));
 
 			if (ModConfig.displayFoodTooltipsBehavior > 1 || context.isAdvanced()) {
-				list.add(new TranslatableText("tooltip.extensible_food.advanced", FoodInfoCommand.createBooleanText(food.isAlwaysEdible()), FoodInfoCommand.createBooleanText(food.isMeat()), FoodInfoCommand.createBooleanText(food.isSnack())));
+				list.add(new TranslatableText("tooltip.extensible_food.advanced", formatBooleanValue(food.isAlwaysEdible()), formatBooleanValue(food.isMeat()), formatBooleanValue(food.isSnack())));
 
 				if (!food.getStatusEffects().isEmpty()) list.add(ADVANCED_MORE_TEXT);
 			}
@@ -43,6 +45,10 @@ public final class FoodTooltip {
 		if (value < 0D) {
 			return new TranslatableText("tooltip.extensible_food.value.negative", ItemStack.MODIFIER_FORMAT.format(-value));
 		} else return new TranslatableText("tooltip.extensible_food.value.positive", ItemStack.MODIFIER_FORMAT.format(value));
+	}
+
+	public static Text formatBooleanValue(final boolean value) {
+		return value ? BOOLEAN_TRUE_TEXT : BOOLEAN_FALSE_TEXT;
 	}
 
 }

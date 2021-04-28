@@ -1,5 +1,7 @@
 package mathjx.extensiblefood.util;
 
+import java.util.Locale;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -7,6 +9,7 @@ import com.google.gson.JsonSyntaxException;
 
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
 public final class JsonUtils {
@@ -43,6 +46,32 @@ public final class JsonUtils {
 		if (to == null) throw new JsonSyntaxException("Missing to, expected to find a object or array");
 
 		return new Box(parseVec3(from, "from").multiply(1D / 16d), parseVec3(to, "to").multiply(1d / 16d));
+	}
+
+	public static Direction getDirection(JsonObject json, String name) throws JsonSyntaxException {
+		switch (JsonHelper.getString(json, name).toLowerCase(Locale.ROOT)) {
+			case "down":
+				return Direction.DOWN;
+
+			case "up":
+				return Direction.UP;
+
+			case "north":
+				return Direction.NORTH;
+
+			case "south":
+				return Direction.SOUTH;
+
+			case "west":
+				return Direction.WEST;
+
+			case "east":
+				return Direction.EAST;
+
+			default:
+				throw new JsonSyntaxException("Unexpected value for " + name + " , got unknown direction: '" + name
+						+ '\'');
+		}
 	}
 
 }

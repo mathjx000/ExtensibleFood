@@ -9,7 +9,8 @@
 	],
 	"client": [
 		"TitleScreenHook",
-		"FoodStatsTooltipHook"
+		"FoodStatsTooltipHook",
+		"RenderLayerAccess"
 	],
 	"injectors": {
 		"defaultRequire": 1
