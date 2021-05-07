@@ -18,6 +18,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import mathjx.extensiblefood.command.FoodInfoCommand;
+import mathjx.extensiblefood.command.FoodStackArgumentType;
 import mathjx.extensiblefood.food.FoodLoader;
 import mathjx.extensiblefood.gui.screen.ErrorScreenGadget;
 import net.fabricmc.api.EnvType;
@@ -26,6 +27,8 @@ import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
+import net.minecraft.command.argument.ArgumentTypes;
+import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 
@@ -114,6 +117,8 @@ public final class ExtensibleFood implements ModInitializer {
 
 		LOGGER.info("Finished loading {} custom foods in {}ms.", Integer.toString(counter), Long.toString(System.currentTimeMillis() - start));
 
+		ArgumentTypes.register(MOD_ID
+				+ ":food_stack", FoodStackArgumentType.class, new ConstantArgumentSerializer<>(FoodStackArgumentType::new));
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> FoodInfoCommand.register(dispatcher));
 	}
 

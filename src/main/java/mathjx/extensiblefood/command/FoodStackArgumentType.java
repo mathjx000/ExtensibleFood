@@ -13,7 +13,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import net.minecraft.command.argument.ItemStackArgument;
 
-final class FoodStackArgumentType implements ArgumentType<ItemStackArgument> {
+public final class FoodStackArgumentType implements ArgumentType<ItemStackArgument> {
 
 	private static final Collection<String> EXAMPLES = Arrays.asList("potato", "minecraft:sweet_berries");
 

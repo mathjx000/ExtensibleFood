@@ -21,6 +21,8 @@
 	"tooltip.extensible_food.value.negative": "-%s",
 	"tooltip.extensible_food.value.true": "true",
 	"tooltip.extensible_food.value.false": "false",
-	"tooltip.extensible_food.advanced": " Always Edible: %s, Meat: %s, Snack: %s",
+	"tooltip.extensible_food.advanced.always_edible": " Always Edible: %s",
+	"tooltip.extensible_food.advanced.meat": " Meat: %s",
+	"tooltip.extensible_food.advanced.snack": " Snack: %s",
 	"tooltip.extensible_food.advanced.more": " ..."
 }

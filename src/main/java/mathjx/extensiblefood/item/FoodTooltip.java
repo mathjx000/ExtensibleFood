@@ -34,7 +34,9 @@ public final class FoodTooltip {
 			list.add(new TranslatableText("tooltip.extensible_food.saturation", formatFloatingValue(food.getSaturationModifier() * food.getHunger() * 2f)).formatted(Formatting.DARK_GREEN));
 
 			if (ModConfig.displayFoodTooltipsBehavior > 1 || context.isAdvanced()) {
-				list.add(new TranslatableText("tooltip.extensible_food.advanced", formatBooleanValue(food.isAlwaysEdible()), formatBooleanValue(food.isMeat()), formatBooleanValue(food.isSnack())));
+				list.add(new TranslatableText("tooltip.extensible_food.advanced.always_edible", formatBooleanValue(food.isAlwaysEdible())));
+				list.add(new TranslatableText("tooltip.extensible_food.advanced.meat", formatBooleanValue(food.isMeat())));
+				list.add(new TranslatableText("tooltip.extensible_food.advanced.snack", formatBooleanValue(food.isSnack())));
 
 				if (!food.getStatusEffects().isEmpty()) list.add(ADVANCED_MORE_TEXT);
 			}
