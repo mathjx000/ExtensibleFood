@@ -1,0 +1,18 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "mathjx.extensiblefood.mixin",
+	"compatibilityLevel": "JAVA_8",
+	"mixins": [
+		"ExtensibleResourcePackRegisterer",
+		"AdvancementsInjector"
+	],
+	"client": [
+		"TitleScreenHook",
+		"FoodStatsTooltipHook",
+		"RenderLayerAccess"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
