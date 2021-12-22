@@ -17,13 +17,17 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import mathjx.extensiblefood.ExtensibleFood;
+import net.fabricmc.fabric.api.resource.ModResourcePack;
 import net.fabricmc.fabric.impl.resource.loader.ModResourcePackUtil;
+import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.resource.AbstractFileResourcePack;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
 
-public final class UserExtensionResourcePack extends AbstractFileResourcePack {
+@Deprecated
+public final class UserExtensionResourcePack extends AbstractFileResourcePack implements ModResourcePack {
 
 	private final LinkOption[] linkOptions = { LinkOption.NOFOLLOW_LINKS };
 
@@ -84,7 +88,7 @@ public final class UserExtensionResourcePack extends AbstractFileResourcePack {
 
 	@Override
 	protected InputStream openFile(final String name) throws IOException {
-		final InputStream stream = ModResourcePackUtil.openDefault(METADATA, name);
+		final InputStream stream = ModResourcePackUtil.openDefault(METADATA, ResourceType.CLIENT_RESOURCES, name);
 		if (stream != null) return stream;
 
 		final Path path = getPath(name);
@@ -112,6 +116,12 @@ public final class UserExtensionResourcePack extends AbstractFileResourcePack {
 
 		final Path path = getPath(name);
 		return path != null && Files.exists(path, linkOptions);
+	}
+
+	@Override
+	public ModMetadata getFabricModMetadata() {
+		// FIXME
+		return ExtensibleFood.METADATA;
 	}
 
 	@Override

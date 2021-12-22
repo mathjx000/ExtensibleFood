@@ -82,11 +82,11 @@ public final class ExtensibleFoodItem extends Item {
 		final ItemStack remaining = super.finishUsing(stack, world, user);
 		final boolean p = user instanceof PlayerEntity;
 
-		if ((!p || !((PlayerEntity) user).abilities.creativeMode) && foodRemainder != null) {
+		if ((!p || !((PlayerEntity) user).getAbilities().creativeMode) && foodRemainder != null) {
 			if (stack.isEmpty()) return new ItemStack(foodRemainder, 1);
 			else if (p) {
 				remaining.increment(1);
-				return ItemUsage.method_30012(remaining, (PlayerEntity) user, new ItemStack(foodRemainder, 1));
+				return ItemUsage.exchangeStack(remaining, (PlayerEntity) user, new ItemStack(foodRemainder, 1));
 			} else user.dropStack(new ItemStack(foodRemainder, 1));
 		}
 

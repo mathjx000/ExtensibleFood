@@ -1,5 +1,6 @@
 package mathjx.extensiblefood.food;
 
+import static mathjx.extensiblefood.ExtensibleFood.IS_CLIENT;
 import static mathjx.extensiblefood.ExtensibleFood.LOGGER;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -16,6 +17,8 @@ import mathjx.extensiblefood.block.CropFoodBlock;
 import mathjx.extensiblefood.item.ExtensibleFoodBlockItem;
 import mathjx.extensiblefood.item.ExtensibleFoodCropItem;
 import mathjx.extensiblefood.item.ExtensibleFoodItem;
+import mathjx.extensiblefood.item.FoodConsumptionProgressModelPredicate;
+import net.fabricmc.fabric.api.object.builder.v1.client.model.FabricModelPredicateProviderRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.ComposterBlock;
 import net.minecraft.entity.effect.StatusEffect;
@@ -188,6 +191,7 @@ public final class FoodLoader {
 		final AtomicBoolean itemGlint_ref = new AtomicBoolean(false);
 		final AtomicReference<Float> composterValue_ref = new AtomicReference<>(null);
 		final Item itemConsumeRemainder;
+		final Identifier itemModelPredicate;
 
 		parseCommonItemProperties(jsonItem, settings, itemName_ref, itemDescription_ref, itemGlint_ref, composterValue_ref);
 
@@ -198,6 +202,11 @@ public final class FoodLoader {
 		if (jsonItem.has("consume_remainder")) {
 			itemConsumeRemainder = JsonHelper.getItem(jsonItem, "consume_remainder");
 		} else itemConsumeRemainder = null;
+
+		if (IS_CLIENT && jsonItem.has("item_model_predicate")) {
+			// This is a client only property
+			itemModelPredicate = new Identifier(JsonHelper.getString(jsonItem, "item_model_predicate"));
+		} else itemModelPredicate = null;
 
 		settings.food(foodComponent.food);
 
@@ -210,6 +219,10 @@ public final class FoodLoader {
 		{
 			final Float f = composterValue_ref.get();
 			if (f != null) ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.put(item, f.floatValue());
+		}
+		// register the model predicate provider if specified
+		if (itemModelPredicate != null) {
+			FabricModelPredicateProviderRegistry.register(item, itemModelPredicate, FoodConsumptionProgressModelPredicate.INSTANCE);
 		}
 
 		return item;

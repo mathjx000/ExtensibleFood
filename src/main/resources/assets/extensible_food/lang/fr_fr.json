@@ -6,7 +6,7 @@
 	"commands.extensible_food.foodinfo.entry_saturation": " - Saturation: %s (Réelle) | %s (valeur interne de Minecraft)",
 	"commands.extensible_food.foodinfo.entry_meat": " - Viande: %s",
 	"commands.extensible_food.foodinfo.entry_alwaysEdible": " - Toujours comestible: %s",
-	"commands.extensible_food.foodinfo.entry_snack": " - Casse-croûte: %s",
+	"commands.extensible_food.foodinfo.entry_snack": " - Nourriture rapide: %s",
 	"commands.extensible_food.foodinfo.entry_effect": " - Effet %s, chance %s: durée: %s, amplificateur: %s, afficher particules: %s, afficher icône: %s",
 	"commands.extensible_food.foodinfo.entry_effect.sub": "%s - Effet %s: durée: %s, amplificateur: %s, ambiant: %s, afficher particules: %s, afficher icône: %s",
 	"argument.extensible_food.food_item.invalid": "L'objet '%s' n'est pas une nourriture",
@@ -17,6 +17,6 @@
 	"tooltip.extensible_food.value.false": "non",
 	"tooltip.extensible_food.advanced.always_edible": " Toujours comestible: %s",
 	"tooltip.extensible_food.advanced.meat": " Viande: %s",
-	"tooltip.extensible_food.advanced.snack": " Casse-croûte: %s",
+	"tooltip.extensible_food.advanced.snack": " Nourriture rapide: %s",
 	"tooltip.extensible_food.advanced.more": " ..."
 }

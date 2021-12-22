@@ -3,31 +3,23 @@
 	"id": "extensible_food",
 	"version": "${version}",
 	"name": "Extensible Food",
-	"description": "A small mod which doesn't add anything... But allows you to add your own foods!",
-	"authors": [
-		"mathjx"
-	],
+	"description": "A mod far too complex compared to the original goal, which doesn't directly add anything... But allows you to add your own foods!",
+	"authors": [ "mathjx" ],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://github.com/mathjx000/ExtensibleFood",
+		"sources": "https://github.com/mathjx000/ExtensibleFood",
+		"issues": "https://github.com/mathjx000/ExtensibleFood"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/entensible_food/icon.png",
 	"environment": "*",
 	"entrypoints": {
-		"main": [
-			"mathjx.extensiblefood.ExtensibleFood"
-		]
+		"main": [ "mathjx.extensiblefood.ExtensibleFood" ]
 	},
-	"mixins": [
-		"extensible_food.mixins.json"
-	],
+	"mixins": [ "extensible_food.mixins.json" ],
 	"depends": {
-		"fabricloader": ">=0.7.4",
-		"fabric": "*",
-		"minecraft": "1.16.x"
-	},
-	"suggests": {
-		"flamingo": "*"
+		"fabricloader": ">=0.12.12",
+		"fabric": ">=0.44.0",
+		"minecraft": "1.17.x"
 	}
 }
