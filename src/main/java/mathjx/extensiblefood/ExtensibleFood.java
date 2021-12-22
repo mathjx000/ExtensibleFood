@@ -21,8 +21,12 @@ import mathjx.extensiblefood.command.FoodInfoCommand;
 import mathjx.extensiblefood.command.FoodStackArgumentType;
 import mathjx.extensiblefood.food.FoodLoader;
 import mathjx.extensiblefood.gui.screen.ErrorScreenGadget;
+import mathjx.extensiblefood.item.tooltip.FoodTooltip;
+import mathjx.extensiblefood.item.tooltip.FoodTooltipComponentCallback;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -45,7 +49,7 @@ public final class ExtensibleFood implements ModInitializer {
 	/**
 	 * <code>true</code> if the game is a client instance
 	 */
-	public static final boolean CLIENT = FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
+	public static final boolean IS_CLIENT = FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
 	/**
 	 * The mod container
 	 */
@@ -68,17 +72,6 @@ public final class ExtensibleFood implements ModInitializer {
 	public static final Path COMMON_RESOURCEPACK_DIR = MOD_CONFIG_DIR.resolve("resourcepack").toAbsolutePath();
 
 	public static final Set<String> USER_NAMESPACES = new HashSet<>();
-
-	//
-
-//	@Deprecated
-//	public static final Tag.Identified<Item> TAG_FOODS = (Identified<Item>) TagRegistry.item(new Identifier("foods"));
-//	@Deprecated
-//	public static final Tag.Identified<Item> TAG_MEATS = (Identified<Item>) TagRegistry.item(new Identifier("meats"));
-//	@Deprecated
-//	public static final Tag.Identified<Item> TAG_SNACKS = (Identified<Item>) TagRegistry.item(new Identifier("snacks"));
-
-	//
 
 	/**
 	 * The entry point of the mod
@@ -120,6 +113,13 @@ public final class ExtensibleFood implements ModInitializer {
 		ArgumentTypes.register(MOD_ID
 				+ ":food_stack", FoodStackArgumentType.class, new ConstantArgumentSerializer<>(FoodStackArgumentType::new));
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> FoodInfoCommand.register(dispatcher));
+
+		if (IS_CLIENT && ModConfig.displayFoodTooltipsImagesLevel > 0) {
+			TooltipComponentCallback.EVENT.register(new FoodTooltipComponentCallback());
+		}
+		if (IS_CLIENT && ModConfig.displayFoodTooltipsTextLevel > 0) {
+			ItemTooltipCallback.EVENT.register(new FoodTooltip());
+		}
 	}
 
 	private int readNamespaceDirectory(final Path dir, final Gson gson, final FoodLoader loader) throws IOException {

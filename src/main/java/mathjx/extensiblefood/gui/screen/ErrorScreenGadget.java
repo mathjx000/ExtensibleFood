@@ -46,7 +46,7 @@ public final class ErrorScreenGadget extends Screen {
 
 	@Override
 	protected void init() {
-		this.addButton(new ButtonWidget(width / 2 - 100, height / 6 + 168, 200, 20, ScreenTexts.BACK, btn -> client.openScreen(parent)));
+		this.addDrawableChild(new ButtonWidget(width / 2 - 100, height / 6 + 168, 200, 20, ScreenTexts.BACK, btn -> client.setScreen(parent)));
 	}
 
 	@Override
@@ -92,7 +92,7 @@ public final class ErrorScreenGadget extends Screen {
 
 	public static void open(final Screen parent) {
 		INSTANCE = new ErrorScreenGadget(parent);
-		MinecraftClient.getInstance().openScreen(INSTANCE);
+		MinecraftClient.getInstance().setScreen(INSTANCE);
 		displayed = true;
 	}
 

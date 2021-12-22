@@ -14,16 +14,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.api.FabricLoader;
-
 public final class ModConfig {
 
 	private static final Path MOD_CONFIG_FILE = ExtensibleFood.MOD_CONFIG_DIR.resolve("config.properties");
 
 	// UI behaviors
 	public static final boolean showModRelatedErrors;
-	public static final int displayFoodTooltipsBehavior;
+	public static final int displayFoodTooltipsImagesLevel;
+	public static final int displayFoodTooltipsTextLevel;
 
 	// Game features
 	public static final boolean overrideFoodAdvancement;
@@ -50,14 +48,22 @@ public final class ModConfig {
 //			initDefaults(props);
 		}
 
-		final boolean server = FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER;
+		if (ExtensibleFood.IS_CLIENT) {
+			// Rename old properties
+			if (props.containsKey("display_food_tooltips_behavior")) {
+				props.put("display_food_tooltips_text_level", props.remove("display_food_tooltips_behavior"));
+				dirtyFlag.setPlain(true);
 
-		if (!server) {
+				LOGGER.info("Renamed config properties.");
+			}
+
 			showModRelatedErrors = parseProperty(props, "show_mod_related_errors", Boolean::parseBoolean, () -> Boolean.toString(true), dirtyFlag);
-			displayFoodTooltipsBehavior = parseProperty(props, "display_food_tooltips_behavior", Integer::parseInt, () -> Integer.toString(0), dirtyFlag);
+			displayFoodTooltipsImagesLevel = parseProperty(props, "display_food_tooltips_images_level", Integer::parseInt, () -> Integer.toString(1), dirtyFlag);
+			displayFoodTooltipsTextLevel = parseProperty(props, "display_food_tooltips_text_level", Integer::parseInt, () -> Integer.toString(1), dirtyFlag);
 		} else {
 			showModRelatedErrors = false;
-			displayFoodTooltipsBehavior = 0;
+			displayFoodTooltipsImagesLevel = 1;
+			displayFoodTooltipsTextLevel = 1;
 		}
 
 		overrideFoodAdvancement = parseProperty(props, "override_food_advancement", Boolean::parseBoolean, () -> Boolean.toString(true), dirtyFlag);
@@ -79,7 +85,7 @@ public final class ModConfig {
 		String value;
 
 		if (!props.containsKey(propertyName)) {
-			dirtyFlag.set(true);
+			dirtyFlag.setPlain(true);
 			if (ifAbsent == null || (value = ifAbsent.get()) == null) {
 				value = null;
 				props.put(propertyName, "");
@@ -99,6 +105,8 @@ public final class ModConfig {
 	}
 
 	static void init() {
+		// static init
+
 		LOGGER.debug("Configuration loaded");
 	}
 

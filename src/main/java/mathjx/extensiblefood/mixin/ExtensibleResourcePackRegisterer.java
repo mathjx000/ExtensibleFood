@@ -1,34 +1,44 @@
 package mathjx.extensiblefood.mixin;
 
-import static mathjx.extensiblefood.ExtensibleFood.MOD_ID;
+import java.util.List;
 
-import java.util.function.Consumer;
-
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import mathjx.extensiblefood.resourcepack.UserExtensionResourcePack;
-import net.fabricmc.fabric.impl.resource.loader.ModResourcePackCreator;
-import net.minecraft.resource.ResourcePackProfile;
-import net.minecraft.resource.ResourcePackProfile.InsertionPosition;
-import net.minecraft.resource.ResourcePackSource;
+import mathjx.extensiblefood.ExtensibleFood;
+import net.fabricmc.fabric.api.resource.ModResourcePack;
+import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
+import net.fabricmc.fabric.impl.resource.loader.ModNioResourcePack;
+import net.fabricmc.fabric.impl.resource.loader.ModResourcePackUtil;
+import net.minecraft.resource.ResourceType;
 
-@Mixin(ModResourcePackCreator.class)
+@Mixin(ModResourcePackUtil.class)
 public final class ExtensibleResourcePackRegisterer {
 
-	private static final ResourcePackSource RESOURCE_PACK_SOURCE = ModResourcePackCreator.RESOURCE_PACK_SOURCE;
+//	private static final ResourcePackSource RESOURCE_PACK_SOURCE = ModResourcePackCreator.RESOURCE_PACK_SOURCE;
 
-	@Inject(method = "register", at = @At(value = "RETURN"))
-	public void register(final Consumer<ResourcePackProfile> consumer, final ResourcePackProfile.Factory factory,
+	@Inject(method = "appendModResourcePacks", at = @At(value = "RETURN"), remap = false)
+	private static void register(List<ModResourcePack> packs, ResourceType type, @Nullable String subPath,
 			final CallbackInfo cb) {
-		@SuppressWarnings("resource")
-		final UserExtensionResourcePack pack = new UserExtensionResourcePack();
-		final ResourcePackProfile profile = ResourcePackProfile.of("fabric/" + MOD_ID
-				+ "/user_extension", true, () -> pack, factory, InsertionPosition.TOP, RESOURCE_PACK_SOURCE);
+		if (subPath == null || subPath == "user_extension") {
+			ModResourcePack pack = new ModNioResourcePack(ExtensibleFood.METADATA, ExtensibleFood.COMMON_RESOURCEPACK_DIR, type, null, ResourcePackActivationType.ALWAYS_ENABLED);
 
-		consumer.accept(profile);
+//			UserExtensionResourcePack pack = new UserExtensionResourcePack();
+
+			if (!pack.getNamespaces(type).isEmpty()) {
+				packs.add(pack);
+			}
+		}
+
+//		@SuppressWarnings("resource")
+//		final UserExtensionResourcePack pack = new UserExtensionResourcePack();
+//		final ResourcePackProfile profile = ResourcePackProfile.of("fabric/" + MOD_ID
+//				+ "/user_extension", true, () -> pack, factory, InsertionPosition.TOP, RESOURCE_PACK_SOURCE);
+//
+//		consumer.accept(profile);
 	}
 
 }

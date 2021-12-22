@@ -59,7 +59,7 @@
 			<section id="food-properties">
 				<h2>Food Properties</h2>
 				<hr/>
-				<p>More informations about foods in Minecraft can be found on the <a href="https://minecraft.fandom.com/wiki/Food" target="_blank">Official Wiki</a>.</p>
+				<p>More informations about foods in Minecraft can be found on the <a href="https://minecraft.fandom.com/wiki/Food" target="_blank"><s>Official</s> Wiki</a>.</p>
 				<ul>
 					<li>
 						<span class="json_sprite json_object"></span>
@@ -72,7 +72,7 @@
 								<ul>
 									<li>
 										<span class="json_sprite json_string"></span>
-										<code>base</code>: <em>(optional)</em> string representing a <a href="https://minecraft.fandom.com/wiki/Namespaced_ID" target="_blank">namespaced item id</a>, allows to use the values of a food already existing in the game. If other parameters are specified, they will override the current parameters.
+										<code>base</code>: <em>(optional)</em> string representing a <a href="https://minecraft.fandom.com/wiki/Namespaced_ID" target="_blank">namespaced item id</a>, allows to use the values of a food already existing in the game. If other parameters are specified, they will override the copied parameters.
 									</li>
 									<li>
 										<span class="json_sprite json_int"></span>
@@ -80,7 +80,7 @@
 									</li>
 									<li>
 										<span class="json_sprite json_float"></span>
-										<code>saturation</code>: float representing the saturation value that is hidden and consumed before the hunger bar. <strong>Keep in mind that saturation level cannot exceed hunger level.</strong>
+										<code>saturation</code>: float representing the saturation value that is hidden and consumed before the hunger bar.
 									</li>
 									<li>
 										<span class="json_sprite json_boolean"></span>
@@ -92,7 +92,7 @@
 									</li>
 									<li>
 										<span class="json_sprite json_boolean"></span>
-										<code>snack</code>: <em>(optional)</em> boolean indicating if the food is a snack; snacks are quick to eat however, if a <a href="#food-eat_time-property">custom consumption time</a> limit is specified, this attribute has no effect. <span class="defval">(default: <var>false</var>)</span>
+										<code>snack</code>: <em>(optional)</em> boolean indicating if the food is a snack; snacks are quick to eat however, if a <a href="#food-eat_time-property">custom consumption time</a> limit is specified, this attribute has no effect with vanilla gameplay. <span class="defval">(default: <var>false</var>)</span>
 									</li>
 									<li id="food-eat_time-property">
 										<span class="json_sprite json_int"></span>
@@ -172,6 +172,7 @@
 			<section id="common-item-properties">
 				<h2>Common Item Properties</h2>
 				<hr/>
+				<p>The following properties are common to both <a href="#food-item-properties">food items</a> and <a href="#block-item-properties">block items</a>.</p>
 				<ul>
 					<li>
 						<span class="json_sprite json_object"></span>
@@ -185,7 +186,7 @@
 								<ul>
 									<li>
 										<span class="json_sprite json_string"></span>
-										<code>group</code>: <em>(optional)</em> string indicating where the item is sorted. <span class="defval">(default: <var>"group"</var>)</span><br/>
+										<code>group</code>: <em>(optional)</em> string indicating where the item is sorted. <span class="defval">(default: <var>"food"</var>)</span><br/>
 										Minecraft Vanilla tabs are: <var>"building_blocks"</var>, <var>"decorations"</var>, <var>"redstone"</var>, <var>"transportation"</var>, <var>"misc"</var>, <var>"food"</var>, <var>"tools"</var>, <var>"combat"</var> and <var>"brewing"</var>.
 									</li>
 									<li>
@@ -250,8 +251,13 @@
 											Minecraft Vanilla values are: <var>"eat"</var> and <var>"drink"</var>.
 										</li>
 										<li>
-											<span class="json_sprite json_sprite"></span>
+											<span class="json_sprite json_string"></span>
 											<code>consume_remainder</code>: <em>(optional)</em> string representing a <a href="https://minecraft.fandom.com/Namespaced_ID" target="_blank">namespaced id</a> of the item that remains after this item was eaten.
+										</li>
+										<li>
+											<span class="json_sprite json_string"></span>
+											<code>item_model_predicate</code>: <em>(optional)</em> string representing the <a href="https://minecraft.fandom.com/Namespaced_ID" target="_blank">namespaced id</a> that should be used for a <a href="https://minecraft.fandom.com/wiki/Model#Item_predicates" target="_blank">model predicate</a> that represents the percentage of consumption of the item. <span class="defval">(default: <var>false</var>)</span><br/>
+											The value is a floating number included between <var>0.0</var> (inclusive) and <var>1.0</var> (exclusive) where both extremes represents <em>"intact" = default</em> state and <em>"consumed"</em> state respectively.
 										</li>
 									</ul>
 								</li>
@@ -301,13 +307,14 @@
 								<code>type</code>: string indicating the type of block. Currently supported values are <a href="#block-consumable"><var>"consumable"</var></a> for blocks like Cake and <a href="#block-crop"><var>"crop"</var></a> for plantable blocks like Wheat.
 							</li>
 							<li>
-								<span class="json_sprite json_object"></span>
+								<span class="json_sprite json_object"></span><span class="json_sprite json_string"></span>
 								<code>material</code><em>*</em>: string or object, if string, the value is the name of the material:
 								<details>
 									<summary style="cursor: pointer;">List of valid names</summary>
 									<div><var>"air"</var>, <var>"structure_void"</var>, <var>"portal"</var>, <var>"carpet"</var>, <var>"plant"</var>, <var>"underwater_plant"</var>, <var>"replaceable_plant"</var>, <var>"nether_shoots"</var>, <var>"replaceable_underwater_plant"</var>, <var>"water"</var>, <var>"bubble_column"</var>, <var>"lava"</var>, <var>"snow_layer"</var>, <var>"fire"</var>, <var>"supported"</var>, <var>"cobweb"</var>, <var>"redstone_lamp"</var>, <var>"organic_product"</var>, <var>"soil"</var>, <var>"solid_organic"</var>, <var>"dense_ice"</var>, <var>"aggregate"</var>, <var>"sponge"</var>, <var>"shulker_box"</var>, <var>"wood"</var>, <var>"nether_wood"</var>, <var>"bamboo_sapling"</var>, <var>"bamboo"</var>, <var>"wool"</var>, <var>"tnt"</var>, <var>"leaves"</var>, <var>"glass"</var>, <var>"ice"</var>, <var>"cactus"</var>, <var>"stone"</var>, <var>"metal"</var>, <var>"snow_block"</var>, <var>"repair_station"</var>, <var>"barrier"</var>, <var>"piston"</var>, <var>"unused_plant"</var>, <var>"ground"</var>, <var>"egg"</var>, <var>"cake"</var></div>
 								</details>
-								
+								<strong>Using a string to specify an existing material is difficult to maintain across versions and is considered deprecated.<br/>You should use a JSON object instead.</strong><br/>
+								See <a href="#custom-meterials">customs materials</a> for specifications.<br/>
 								<em>* In case of crop blocks, the default used material is <var>"plant"</var></em>
 							</li>
 							<li>
@@ -524,6 +531,10 @@
 							<ul>
 								<li>
 									<span class="json_sprite json_string"></span>
+									<code>copy_from_block</code>: <em>(optional)</em> copies the material of another block using it's <a href="https://minecraft.fandom.com/Namespaced_ID" target="_blank">namespaced id</a>.<br/>If specified, others fields are ignored.
+								</li>
+								<li>
+									<span class="json_sprite json_string"></span>
 									<code>color</code>: string of format <var>dye//&lt;dye_name&gt;</var> if you want to use dye colors, else this is just a material name.
 								</li>
 								<li>
@@ -665,7 +676,7 @@
 								<li>
 									<span class="json_sprite json_string"></span>
 									<code>particle</code>: string representing the particle type id followed by parameters (if required by the particle).<br/>
-									See the <a href="https://minecraft.fandom.com/wiki/Argument_types#particle" target="_blank">Official Wiki</a> for more informations about particles and their parameters.
+									See the <a href="https://minecraft.fandom.com/wiki/Argument_types#particle" target="_blank"><s>Official</s> Wiki</a> for more informations about particles and their parameters.
 								</li>
 								<li>
 									<span class="json_sprite json_array"></span>
@@ -771,7 +782,7 @@
 					
 					<ul>
 						<li>
-							<span class="json_sprite json_string"></span>
+							<span class="json_sprite json_object"></span>
 							The condition object
 							
 							<ul>
@@ -794,7 +805,7 @@
 						
 						<ul>
 							<li>
-								<span class="json_sprite json_string"></span>
+								<span class="json_sprite json_object"></span>
 								<ul>
 									<li>
 										<span class="json_sprite json_string"></span>
@@ -827,13 +838,43 @@
 							</li>
 						</ul>
 					</section>
+					<section>
+						<h3>Is Block Side Solid Condition</h3>
+						<hr/>
+						
+						<p>This condition ensures the specified side of an adjacent block is solid.</p>
+						
+						<ul>
+							<li>
+								<span class="json_sprite json_object"></span>
+								<ul>
+									<li>
+										<span class="json_sprite json_string"></span>
+										<code>condition</code>: <var>"is_side_solid"</var>
+									</li>
+									<li>
+										<span class="json_sprite json_string"></span>
+										<code>side</code>: <em>(optional)</em> TODO. <span class="defval">(default: <var>"down"</var>)</span><br/>
+										Allowed values are: <var>"up"</var>, <var>"down"</var>, <var>"north"</var>, <var>"south"</var>, <var>"west"</var>, <var>"east"</var>.
+									</li>
+									<li>
+										<span class="json_sprite json_string"></span>
+										<code>shape_type</code>: TODO<br/>
+										Allowed values are: <var>"full"</var>, <var>"center"</var>, <var>"rigid"</var>.
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</section>
 				</section>
 			</section>
 			
 			</article>
-			<!-- <hr/> -->
-			<!-- <footer> -->
-			<!-- </footer> -->
+			<hr/>
+			<footer>
+				⚠<br/>
+				Some of the properties may chance in the future.<br/>This mod is still work in progress.
+			</footer>
 		</div>
 	</body>
 </html>

@@ -18,7 +18,7 @@ import com.google.gson.JsonSyntaxException;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import net.minecraft.command.argument.ParticleArgumentType;
+import net.minecraft.command.argument.ParticleEffectArgumentType;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -63,7 +63,7 @@ public abstract class ParticleEmission {
 
 		ParticleEffect particleEffect;
 		try {
-			particleEffect = ParticleArgumentType.readParameters(new StringReader(getString(jsonParticle, "particle")));
+			particleEffect = ParticleEffectArgumentType.readParameters(new StringReader(getString(jsonParticle, "particle")));
 		} catch (final CommandSyntaxException e) {
 			throw new JsonSyntaxException(e.getMessage(), e);
 		}
