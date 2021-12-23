@@ -97,6 +97,7 @@ public final class ConsumableFoodBlock extends Block {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public BlockState getStateForNeighborUpdate(final BlockState state, final Direction direction,
 			final BlockState newState, final WorldAccess world, final BlockPos pos, final BlockPos posFrom) {
@@ -140,8 +141,6 @@ public final class ConsumableFoodBlock extends Block {
 	@Override
 	public void onEntityCollision(final BlockState state, final World world, final BlockPos pos, final Entity entity) {
 		if (collisionEffect != null) collisionEffect.onEntityCollision(state, world, pos, entity);
-
-		super.onEntityCollision(state, world, pos, entity);
 	}
 
 }

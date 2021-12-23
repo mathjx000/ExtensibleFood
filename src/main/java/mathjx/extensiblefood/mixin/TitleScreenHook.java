@@ -14,7 +14,7 @@ import net.minecraft.client.gui.screen.TitleScreen;
 @Mixin(TitleScreen.class)
 public final class TitleScreenHook {
 
-	@Inject(method = "init()V", at = @At("HEAD"))
+	@Inject(method = "init()V", at = @At("TAIL"))
 	private void init(final CallbackInfo cb) {
 		if (ErrorScreenGadget.shouldDisplay()) {
 			ErrorScreenGadget.open((TitleScreen) (Object) this);
