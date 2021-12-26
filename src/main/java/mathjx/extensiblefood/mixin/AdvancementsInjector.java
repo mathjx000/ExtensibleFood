@@ -59,18 +59,20 @@ public final class AdvancementsInjector {
 					identifier = e.getKey().getValue();
 
 					if (names.add(name = identifier.getPath()) || names.add(name = identifier.toString())) {
-						final JsonObject a = new JsonObject();
-						a.addProperty("trigger", triggerName);
-						final JsonObject b = new JsonObject();
-						final JsonObject c = new JsonObject();
-						c.addProperty("item", identifier.toString());
-						b.add("item", c);
-						a.add("conditions", b);
-						criteria.add(name, a);
+						final JsonObject criteriaEntry = new JsonObject();
+						criteriaEntry.addProperty("trigger", triggerName);
+						final JsonObject criteriaConditions = new JsonObject();
+						final JsonArray itemsArray = new JsonArray();
+						itemsArray.add(identifier.toString());
+						final JsonObject itemCondition = new JsonObject();
+						itemCondition.add("items", itemsArray);
+						criteriaConditions.add("item", itemCondition);
+						criteriaEntry.add("conditions", criteriaConditions);
+						criteria.add(name, criteriaEntry);
 
-						final JsonArray d = new JsonArray();
-						d.add(name);
-						requirements.add(d);
+						final JsonArray requirementsEntry = new JsonArray();
+						requirementsEntry.add(name);
+						requirements.add(requirementsEntry);
 					} else
 						// this case will never happen (in theory)
 						throw new RuntimeException("Same item entry processed twice!");
