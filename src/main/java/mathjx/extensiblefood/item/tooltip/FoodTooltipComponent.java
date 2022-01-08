@@ -8,7 +8,6 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.item.TooltipData;
 import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.util.Identifier;
@@ -37,7 +36,7 @@ public final class FoodTooltipComponent implements TooltipData, TooltipComponent
 
 	@Override
 	public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer,
-			int z, TextureManager textureManager) {
+			int z) {
 		// TODO: support of mixing with others components
 		// TODO: support of effect display
 

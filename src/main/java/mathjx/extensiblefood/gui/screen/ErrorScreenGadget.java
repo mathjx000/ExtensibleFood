@@ -60,7 +60,7 @@ public final class ErrorScreenGadget extends Screen {
 		final int max = Math.min(entries.size(), maxLines);
 		ReportEntry entry;
 
-		final Matrix4f matrix4f = matrices.peek().getModel();
+		final Matrix4f matrix4f = matrices.peek().getPositionMatrix();
 		final VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
 
 		for (int i = 0; i < max; i++) {
