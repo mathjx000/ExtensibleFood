@@ -56,7 +56,6 @@ public final class CropFoodBlock extends CropBlock {
 		return maxAge;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public IntProperty getAgeProperty() {
 		return propertyAge == null ? BlockParser.BRUH : propertyAge;
@@ -101,7 +100,6 @@ public final class CropFoodBlock extends CropBlock {
 				: stayCondition.test(state, (World) world, pos);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	protected void appendProperties(final Builder<Block, BlockState> builder) {
 		builder.add(BlockParser.BRUH);

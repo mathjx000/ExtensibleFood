@@ -195,7 +195,8 @@ public final class BlockParser {
 
 		if (jsonBlock.has("lights")) parseLightingValues(settings, bites + 1, getObject(jsonBlock, "lights"), propertyBites);
 
-		return new ConsumableFoodBlock(settings, bites, BRUH = propertyBites, bitesToShape, getBoolean(jsonBlock, "comparator_enabled", true), foodComponent, stayCondition, particleEmission, collisionEffect);
+		BRUH = propertyBites;
+		return new ConsumableFoodBlock(settings, bites, propertyBites, bitesToShape, getBoolean(jsonBlock, "comparator_enabled", true), foodComponent, stayCondition, particleEmission, collisionEffect);
 	}
 
 	private static CropFoodBlock parseCropFoodBlock(final JsonObject jsonBlock, final AbstractBlock.Settings settings,

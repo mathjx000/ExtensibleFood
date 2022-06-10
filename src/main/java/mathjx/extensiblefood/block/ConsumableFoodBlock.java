@@ -111,7 +111,6 @@ public final class ConsumableFoodBlock extends Block {
 		return stayCondition == null ? true : stayCondition.test(state, (World) world, pos);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	protected void appendProperties(final Builder<Block, BlockState> builder) {
 		builder.add(BlockParser.BRUH);
