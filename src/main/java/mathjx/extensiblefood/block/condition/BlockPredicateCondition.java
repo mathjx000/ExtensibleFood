@@ -1,7 +1,5 @@
 package mathjx.extensiblefood.block.condition;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.argument.BlockPredicateArgumentType.BlockPredicate;
@@ -21,12 +19,12 @@ public final class BlockPredicateCondition extends BlockStayCondition {
 
 	@Override
 	public boolean test(final BlockState state, final World world, final BlockPos pos) {
-		try {
-			return predicate.create(world.getTagManager()).test(new CachedBlockPosition(world, pos.add(offset), false));
-		} catch (final CommandSyntaxException e) {
-			e.printStackTrace();
-			return false;
-		}
+//		try {
+			return predicate/*predicate.create(world.getTagManager())*/.test(new CachedBlockPosition(world, pos.add(offset), false));
+//		} catch (final CommandSyntaxException e) {
+//			e.printStackTrace();
+//			return false;
+//		}
 	}
 
 }

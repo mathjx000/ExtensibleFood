@@ -53,7 +53,7 @@ public final class AdvancementsInjector {
 
 				Identifier identifier;
 				String name;
-				for (final Entry<RegistryKey<Item>, Item> e : Registry.ITEM.getEntries()) {
+				for (final Entry<RegistryKey<Item>, Item> e : Registry.ITEM.getEntrySet()) {
 					if (!e.getValue().isFood()) continue;
 
 					identifier = e.getKey().getValue();

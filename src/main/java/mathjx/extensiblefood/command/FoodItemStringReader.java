@@ -1,7 +1,5 @@
 package mathjx.extensiblefood.command;
 
-import static net.minecraft.command.argument.ItemStringReader.ID_INVALID_EXCEPTION;
-
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -11,38 +9,45 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
+import net.minecraft.command.CommandRegistryWrapper;
 import net.minecraft.command.CommandSource;
 import net.minecraft.item.Item;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryEntry;
+import net.minecraft.util.registry.RegistryKey;
 
 public final class FoodItemStringReader {
 
-	public static final DynamicCommandExceptionType NOT_FOOD_EXCEPTION = new DynamicCommandExceptionType(object -> new TranslatableText("argument.extensible_food.food_item.invalid", object));
+	private static final DynamicCommandExceptionType ID_INVALID_EXCEPTION = new DynamicCommandExceptionType(id -> Text.translatable("argument.item.id.invalid", id));
+	private static final DynamicCommandExceptionType NOT_FOOD_EXCEPTION = new DynamicCommandExceptionType(object -> Text.translatable("argument.extensible_food.food_item.invalid", object));
 
+	private final CommandRegistryWrapper<Item> registryWrapper;
 	private final StringReader reader;
-	private Item item;
+	private RegistryEntry<Item> item;
 
 	private boolean suggest = true;
 
-	public FoodItemStringReader(final StringReader reader) {
+	public FoodItemStringReader(CommandRegistryWrapper<Item> registryWrapper, StringReader reader) {
+		this.registryWrapper = registryWrapper;
 		this.reader = reader;
 	}
 
-	public Item getItem() {
+	public RegistryEntry<Item> getItem() {
 		return item;
 	}
 
-	public void readItem() throws CommandSyntaxException {
+	private void readItem() throws CommandSyntaxException {
 		final int i = reader.getCursor();
 		final Identifier identifier = Identifier.fromCommandInput(reader);
 
-		final Item item = Registry.ITEM.getOrEmpty(identifier).orElseThrow(() -> {
+		;
+		final RegistryEntry<Item> item = registryWrapper.getEntry(RegistryKey.of(Registry.ITEM_KEY, identifier)).orElseThrow(() -> {
 			reader.setCursor(i);
 			return ID_INVALID_EXCEPTION.createWithContext(reader, identifier.toString());
 		});
-		if (item.isFood()) {
+		if (item.value().isFood()) {
 			this.item = item;
 		} else {
 			reader.setCursor(i);
@@ -60,7 +65,7 @@ public final class FoodItemStringReader {
 
 	public CompletableFuture<Suggestions> getSuggestions(final SuggestionsBuilder builder) {
 		if (suggest) {
-			final Stream<Identifier> stream = Registry.ITEM.getEntries().stream().filter(e -> e.getValue().isFood()).map(e -> e.getKey().getValue());
+			final Stream<Identifier> stream = Registry.ITEM.getEntrySet().stream().filter(e -> e.getValue().isFood()).map(e -> e.getKey().getValue());
 			return CommandSource.suggestIdentifiers(stream, builder);
 		} else return builder.buildFuture();
 	}

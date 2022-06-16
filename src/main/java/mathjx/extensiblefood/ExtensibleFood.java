@@ -27,11 +27,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.command.argument.ArgumentTypes;
 import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
@@ -110,9 +110,9 @@ public final class ExtensibleFood implements ModInitializer {
 
 		LOGGER.info("Finished loading {} custom foods in {}ms.", Integer.toString(counter), Long.toString(System.currentTimeMillis() - start));
 
-		ArgumentTypes.register(MOD_ID
-				+ ":food_stack", FoodStackArgumentType.class, new ConstantArgumentSerializer<>(FoodStackArgumentType::new));
-		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> FoodInfoCommand.register(dispatcher));
+		ArgumentTypeRegistry.registerArgumentType(new Identifier(MOD_ID, "food_stack"), FoodStackArgumentType.class, ConstantArgumentSerializer.of(FoodStackArgumentType::new));
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess,
+				environment) -> FoodInfoCommand.register(dispatcher, registryAccess));
 
 		if (IS_CLIENT && ModConfig.displayFoodTooltipsImagesLevel > 0) {
 			TooltipComponentCallback.EVENT.register(new FoodTooltipComponentCallback());

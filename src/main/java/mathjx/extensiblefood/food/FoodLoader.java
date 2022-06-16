@@ -18,9 +18,10 @@ import mathjx.extensiblefood.item.ExtensibleFoodBlockItem;
 import mathjx.extensiblefood.item.ExtensibleFoodCropItem;
 import mathjx.extensiblefood.item.ExtensibleFoodItem;
 import mathjx.extensiblefood.item.FoodConsumptionProgressModelPredicate;
-import net.fabricmc.fabric.api.object.builder.v1.client.model.FabricModelPredicateProviderRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.ComposterBlock;
+import net.minecraft.client.item.ModelPredicateProviderRegistry;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.BlockItem;
@@ -34,15 +35,20 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.Rarity;
 import net.minecraft.util.UseAction;
+import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.Registry;
 
 public final class FoodLoader {
 
 //	private final Gson gson;
 
+	private final CommandRegistryAccess commandRegistryAccess;
+
 	public FoodLoader() {
 //		final GsonBuilder builder = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping();
 //		this.gson = builder.create();
+
+		commandRegistryAccess = new CommandRegistryAccess(DynamicRegistryManager.BUILTIN.get());
 	}
 
 	public void applyFood(final JsonObject file, final Identifier autoId) throws JsonParseException {
@@ -51,7 +57,7 @@ public final class FoodLoader {
 		Item theItem;
 		if (file.has("block")) {
 			final JsonObject jsonBlock = JsonHelper.getObject(file, "block");
-			final Block block = BlockParser.parseBlock(jsonBlock, foodComponent);
+			final Block block = BlockParser.parseBlock(jsonBlock, foodComponent, commandRegistryAccess);
 
 			if (block instanceof CropFoodBlock) {
 				if (jsonBlock.has("crop_item")) {
@@ -168,7 +174,8 @@ public final class FoodLoader {
 				JsonHelper.getBoolean(object, "show_icon", true),
 				object.has("hidden_effect")
 					? parseEffect(JsonHelper.getObject(object, "hidden_effect"))
-					: null
+					: null,
+				effect.getFactorCalculationDataSupplier()		// TODO: custom calculation data ?
 			);
 		// @formatter:on
 	}
@@ -222,7 +229,7 @@ public final class FoodLoader {
 		}
 		// register the model predicate provider if specified
 		if (itemModelPredicate != null) {
-			FabricModelPredicateProviderRegistry.register(item, itemModelPredicate, FoodConsumptionProgressModelPredicate.INSTANCE);
+			ModelPredicateProviderRegistry.register(item, itemModelPredicate, FoodConsumptionProgressModelPredicate.INSTANCE);
 		}
 
 		return item;

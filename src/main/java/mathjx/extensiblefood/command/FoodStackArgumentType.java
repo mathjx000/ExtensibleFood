@@ -11,15 +11,25 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
+import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.command.CommandRegistryWrapper;
 import net.minecraft.command.argument.ItemStackArgument;
+import net.minecraft.item.Item;
+import net.minecraft.util.registry.Registry;
 
 public final class FoodStackArgumentType implements ArgumentType<ItemStackArgument> {
 
 	private static final Collection<String> EXAMPLES = Arrays.asList("potato", "minecraft:sweet_berries");
 
+	private final CommandRegistryWrapper<Item> registryWrapper;
+
+	public FoodStackArgumentType(CommandRegistryAccess commandRegistryAccess) {
+		this.registryWrapper = commandRegistryAccess.createWrapper(Registry.ITEM_KEY);
+	}
+
 	@Override
 	public ItemStackArgument parse(final StringReader reader) throws CommandSyntaxException {
-		final FoodItemStringReader itemStringReader = new FoodItemStringReader(reader).consume();
+		final FoodItemStringReader itemStringReader = new FoodItemStringReader(registryWrapper, reader).consume();
 		return new ItemStackArgument(itemStringReader.getItem(), null);
 	}
 
@@ -28,7 +38,7 @@ public final class FoodStackArgumentType implements ArgumentType<ItemStackArgume
 			final SuggestionsBuilder builder) {
 		final StringReader reader = new StringReader(builder.getInput());
 		reader.setCursor(builder.getStart());
-		final FoodItemStringReader stringReader = new FoodItemStringReader(reader);
+		final FoodItemStringReader stringReader = new FoodItemStringReader(registryWrapper, reader);
 
 		try {
 			stringReader.consume();

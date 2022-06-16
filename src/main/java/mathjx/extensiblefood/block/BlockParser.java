@@ -35,6 +35,7 @@ import net.minecraft.block.MapColor;
 import net.minecraft.block.Material;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.DyeColor;
@@ -51,8 +52,8 @@ public final class BlockParser {
 	@Deprecated
 	static IntProperty BRUH;
 
-	public static synchronized Block parseBlock(final JsonObject jsonBlock,
-			final ExtendedFoodComponent foodComponent) throws JsonSyntaxException {
+	public static synchronized Block parseBlock(final JsonObject jsonBlock, final ExtendedFoodComponent foodComponent,
+			CommandRegistryAccess commandRegistryAccess) throws JsonSyntaxException {
 		final BlockType type;
 		{
 			if (!jsonBlock.has("type")) {
@@ -114,12 +115,12 @@ public final class BlockParser {
 
 					for (int i = 0; i < len; i++) {
 						conditions[i] = BlockStayCondition.parseCondition(asObject(array.get(i), "placement_conditions["
-								+ i + '\''));
+								+ i + '\''), commandRegistryAccess);
 					}
 
 					stayCondition = BlockStayCondition.createCompoundAND(conditions);
 				}
-			} else stayCondition = BlockStayCondition.parseCondition(asObject(jsonCondition, "placement_conditions"));
+			} else stayCondition = BlockStayCondition.parseCondition(asObject(jsonCondition, "placement_conditions"), commandRegistryAccess);
 		} else stayCondition = null;
 
 		final ParticleEmission particleEmission = jsonBlock.has("particles")
