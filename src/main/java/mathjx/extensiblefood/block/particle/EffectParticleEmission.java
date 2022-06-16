@@ -1,6 +1,6 @@
 package mathjx.extensiblefood.block.particle;
 
-import java.util.Random;
+import net.minecraft.util.math.random.Random;
 
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.util.math.BlockPos;

@@ -9,8 +9,6 @@ import static net.minecraft.util.JsonHelper.getInt;
 import static net.minecraft.util.JsonHelper.getObject;
 import static net.minecraft.util.JsonHelper.getString;
 
-import java.util.Random;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -23,6 +21,7 @@ import net.minecraft.particle.ParticleEffect;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 
 public abstract class ParticleEmission {

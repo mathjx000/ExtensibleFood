@@ -1,6 +1,6 @@
 package mathjx.extensiblefood.block;
 
-import java.util.Random;
+import net.minecraft.util.math.random.Random;
 
 import com.mojang.datafixers.util.Pair;
 

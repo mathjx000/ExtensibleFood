@@ -1,7 +1,5 @@
 package mathjx.extensiblefood.block;
 
-import java.util.Random;
-
 import mathjx.extensiblefood.block.collision.CollisionEffect;
 import mathjx.extensiblefood.block.condition.BlockStayCondition;
 import mathjx.extensiblefood.block.particle.ParticleEmission;
@@ -16,6 +14,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager.Builder;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
