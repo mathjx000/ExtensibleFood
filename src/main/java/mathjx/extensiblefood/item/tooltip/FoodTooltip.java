@@ -3,6 +3,7 @@ package mathjx.extensiblefood.item.tooltip;
 import java.util.List;
 
 import mathjx.extensiblefood.ModConfig;
+import mathjx.extensiblefood.util.Utils;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.FoodComponent;
@@ -32,7 +33,7 @@ public final class FoodTooltip implements ItemTooltipCallback {
 
 			lines.add(HEADER_TEXT);
 			lines.add(Text.translatable("tooltip.extensible_food.hunger", formatFloatingValue(food.getHunger() / 2D)).formatted(Formatting.BLUE));
-			lines.add(Text.translatable("tooltip.extensible_food.saturation", formatFloatingValue(food.getSaturationModifier() * food.getHunger() * 2f)).formatted(Formatting.DARK_GREEN));
+			lines.add(Text.translatable("tooltip.extensible_food.saturation", formatFloatingValue(Utils.saturationRatioToHumanReadableSaturationPoints(food.getHunger(), food.getSaturationModifier()))).formatted(Formatting.DARK_GREEN));
 
 			if (ModConfig.displayFoodTooltipsTextLevel > 1 || context.isAdvanced()) {
 				lines.add(Text.translatable("tooltip.extensible_food.advanced.always_edible", formatBooleanValue(food.isAlwaysEdible())));

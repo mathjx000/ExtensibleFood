@@ -31,6 +31,7 @@ public final class FoodTooltipComponent implements TooltipData, TooltipComponent
 
 	@Override
 	public int getWidth(final TextRenderer textRenderer) {
+		// Utils.saturationRatioToHumanReadableSaturationPoints(food.getHunger(), food.getSaturationModifier())
 		return Math.max((food.getHunger() + 1) / 2 * FULL_UNIT_WIDTH, (int) (food.getHunger() * food.getSaturationModifier() * FULL_UNIT_WIDTH));
 	}
 

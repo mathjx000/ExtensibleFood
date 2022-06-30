@@ -3,7 +3,7 @@
 	"extensible_food.errorScreen.error.hidden": "%d autres...",
 	"commands.extensible_food.foodinfo.info_header": "Informations de nutrition pour l'objet %s:",
 	"commands.extensible_food.foodinfo.entry_hunger": " - Satiété: %s",
-	"commands.extensible_food.foodinfo.entry_saturation": " - Saturation: %s (Réelle) | %s (valeur interne de Minecraft)",
+	"commands.extensible_food.foodinfo.entry_saturation": " - Points de Saturation: %s | Ratio %s (valeur interne de Minecraft)",
 	"commands.extensible_food.foodinfo.entry_meat": " - Viande: %s",
 	"commands.extensible_food.foodinfo.entry_alwaysEdible": " - Toujours comestible: %s",
 	"commands.extensible_food.foodinfo.entry_snack": " - Nourriture rapide: %s",

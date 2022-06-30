@@ -15,6 +15,7 @@ import mathjx.extensiblefood.item.ExtensibleFoodBlockItem;
 import mathjx.extensiblefood.item.ExtensibleFoodCropItem;
 import mathjx.extensiblefood.item.ExtensibleFoodItem;
 import mathjx.extensiblefood.item.FoodConsumptionProgressModelPredicate;
+import mathjx.extensiblefood.util.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.ComposterBlock;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
@@ -124,7 +125,13 @@ public final class FoodLoader {
 		}
 
 		if (foodJson.has("hunger") || hunger == null) hunger = JsonHelper.getInt(foodJson, "hunger");
-		if (foodJson.has("saturation") || saturation == null) saturation = JsonHelper.getFloat(foodJson, "saturation");
+		if (foodJson.has("saturation") || saturation == null) saturation = Utils.humanReadableSaturationPointsToSaturationRatio(hunger, JsonHelper.getFloat(foodJson, "saturation"));
+		if (foodJson.has("saturation_ratio") || saturation == null) {
+			if (foodJson.has("saturation"))
+				throw new JsonSyntaxException("Conflit between properties 'saturation' and 'saturation_ratio'. Use only one of them.");
+			saturation = JsonHelper.getFloat(foodJson, "saturation_ratio");
+		}
+
 		if (foodJson.has("always_edible") || alwaysEdible == null) alwaysEdible = JsonHelper.getBoolean(foodJson, "always_edible", false);
 		if (foodJson.has("meat") || meat == null) meat = JsonHelper.getBoolean(foodJson, "meat", false);
 		if (foodJson.has("snack") || snack == null) snack = JsonHelper.getBoolean(foodJson, "snack", false);
@@ -133,9 +140,7 @@ public final class FoodLoader {
 				? itemEatSound = parseSoundEvent(JsonHelper.getString(foodJson, "eat_sound")) : null;
 
 		builder.hunger(hunger);
-		builder.saturationModifier(
-				// convert the real saturation value to the internal one
-				saturation / (float) hunger / 2f);
+		builder.saturationModifier(saturation);
 		if (alwaysEdible) builder.alwaysEdible();
 		if (meat) builder.meat();
 		if (snack) builder.snack();
