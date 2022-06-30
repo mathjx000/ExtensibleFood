@@ -11,13 +11,13 @@ public class IsBlockSideSolidCondition extends BlockStayCondition {
 	private final Direction side;
 	private final SideShapeType shapeType;
 
-	public IsBlockSideSolidCondition(Direction side, SideShapeType shapeType) {
+	public IsBlockSideSolidCondition(final Direction side, final SideShapeType shapeType) {
 		this.side = side;
 		this.shapeType = shapeType;
 	}
 
 	@Override
-	public boolean test(BlockState state, World world, BlockPos pos) {
+	public boolean test(final BlockState state, final World world, BlockPos pos) {
 		pos = pos.offset(side);
 		return world.getBlockState(pos).isSideSolid(world, pos, side.getOpposite(), shapeType);
 	}

@@ -9,9 +9,9 @@ import net.minecraft.util.Identifier;
 /**
  * This class is a generic item model predicate provider for consumption
  * progress of food items.
- * 
+ *
  * It provides a value from <code>0f</code> to <code>1f</code>.
- * 
+ *
  * This class act as a singleton since no specific data needs to be specified.
  * Only the {@link Identifier} key may change.
  */
@@ -22,10 +22,11 @@ public final class FoodConsumptionProgressModelPredicate implements UnclampedMod
 	private FoodConsumptionProgressModelPredicate() {}
 
 	@Override
-	public float unclampedCall(ItemStack stack, ClientWorld world, /* @Nullable */ LivingEntity entity, int seed) {
+	public float unclampedCall(final ItemStack stack, final ClientWorld world,
+			/* @Nullable */ final LivingEntity entity, final int seed) {
 		// Ensure this is the item being used
 		if (entity != null && entity.isUsingItem() && entity.getActiveItem() == stack) {
-			return 1f - ((float) entity.getItemUseTimeLeft() / (float) stack.getMaxUseTime());
+			return 1f - (float) entity.getItemUseTimeLeft() / (float) stack.getMaxUseTime();
 		} else return 0f;
 	}
 

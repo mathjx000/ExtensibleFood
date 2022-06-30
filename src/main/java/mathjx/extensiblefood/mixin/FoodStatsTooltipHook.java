@@ -20,12 +20,12 @@ public final class FoodStatsTooltipHook {
 	 * Here we inject our food tooltip.
 	 */
 	@Inject(method = "getTooltipData", at = @At(value = "RETURN"), cancellable = true)
-	private void injectTooltipData(CallbackInfoReturnable<Optional<TooltipData>> cir) {
+	private void injectTooltipData(final CallbackInfoReturnable<Optional<TooltipData>> cir) {
 		if (ModConfig.displayFoodTooltipsImagesLevel > 0 && cir.getReturnValue().isEmpty()) {
-			ItemStack thiz = (ItemStack) (Object) this;
+			final ItemStack thiz = (ItemStack) (Object) this;
 
 			if (thiz.isFood()) {
-				FoodComponent component = thiz.getItem().getFoodComponent();
+				final FoodComponent component = thiz.getItem().getFoodComponent();
 				cir.setReturnValue(Optional.of(new FoodTooltipComponent(component)));
 			}
 		}

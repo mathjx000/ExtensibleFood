@@ -53,15 +53,16 @@ public final class BlockShapeParser {
 		} else throw new JsonSyntaxException("expected shape " + stateName + " to be an array or an object");
 	}
 
-	public static VoxelShape[] parseShapes(JsonObject jsonShapes, int expectedShapeCount) throws JsonSyntaxException {
+	public static VoxelShape[] parseShapes(final JsonObject jsonShapes,
+			final int expectedShapeCount) throws JsonSyntaxException {
 		if (jsonShapes.has("base")) {
-			VoxelShape base = parseStateShape(jsonShapes.get("base"), "base");
-			Direction dir = JsonUtils.getDirection(jsonShapes, "direction");
+			final VoxelShape base = parseStateShape(jsonShapes.get("base"), "base");
+			final Direction dir = JsonUtils.getDirection(jsonShapes, "direction");
 
 			return msliceBaseShape(base, expectedShapeCount, dir);
 		}
 
-		VoxelShape[] shapes = new VoxelShape[expectedShapeCount];
+		final VoxelShape[] shapes = new VoxelShape[expectedShapeCount];
 		final VoxelShape defaultShape = jsonShapes.has("default")
 				? BlockShapeParser.parseStateShape(getObject(jsonShapes, "default"), "default") : VoxelShapes.empty();
 
@@ -76,25 +77,25 @@ public final class BlockShapeParser {
 		return shapes;
 	}
 
-	private static VoxelShape[] msliceBaseShape(VoxelShape shape, int slices, Direction direction) {
+	private static VoxelShape[] msliceBaseShape(final VoxelShape shape, int slices, Direction direction) {
 		direction = direction.getOpposite();
 
-		VoxelShape[] shapes = new VoxelShape[slices];
-		Box bb = shape.getBoundingBox();
+		final VoxelShape[] shapes = new VoxelShape[slices];
+		final Box bb = shape.getBoundingBox();
 
 		// direction vector
-		Vec3i vec3i = direction.getVector();
+		final Vec3i vec3i = direction.getVector();
 		// inverted direction vector mask
-		Vec3i dirMaskInv = new Vec3i(1 - Math.abs(vec3i.getX()), 1 - Math.abs(vec3i.getY()), 1 - Math.abs(vec3i.getZ()));
+		final Vec3i dirMaskInv = new Vec3i(1 - Math.abs(vec3i.getX()), 1 - Math.abs(vec3i.getY()), 1 - Math.abs(vec3i.getZ()));
 
-		double bx = direction == Direction.WEST ? bb.maxX : bb.minX,
+		final double bx = direction == Direction.WEST ? bb.maxX : bb.minX,
 				by = direction == Direction.DOWN ? bb.maxY : bb.minY,
 				bz = direction == Direction.NORTH ? bb.maxZ : bb.minZ;
 
 		// vec3i gives the masking and the direction
-		double dx = (bb.getXLength() / (double) slices) * vec3i.getX(),
-				dy = (bb.getYLength() / (double) slices) * vec3i.getY(),
-				dz = (bb.getZLength() / (double) slices) * vec3i.getZ();
+		final double dx = bb.getXLength() / slices * vec3i.getX(),
+				dy = bb.getYLength() / slices * vec3i.getY(),
+				dz = bb.getZLength() / slices * vec3i.getZ();
 
 		double mx = bb.maxX * dirMaskInv.getX() + bx * Math.abs(vec3i.getX()) + dx,
 				my = bb.maxY * dirMaskInv.getY() + by * Math.abs(vec3i.getY()) + dy,

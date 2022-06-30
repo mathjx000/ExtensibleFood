@@ -27,13 +27,14 @@ public final class ExtensibleFoodCropItem extends AliasedBlockItem {
 
 	/*
 	 * Item food properties
-	 * 
+	 *
 	 * Used for eat time and sound
 	 */
 	private final ExtendedFoodComponent foodComponent;
 
 	public ExtensibleFoodCropItem(final Block block, final Settings settings, final Text name, final Text description,
-			final boolean glint, UseAction useAction, Item foodRemainder, ExtendedFoodComponent foodComponentExt) {
+			final boolean glint, final UseAction useAction, final Item foodRemainder,
+			final ExtendedFoodComponent foodComponentExt) {
 		super(block, settings);
 
 		this.name = name;
@@ -41,7 +42,7 @@ public final class ExtensibleFoodCropItem extends AliasedBlockItem {
 		this.glint = glint;
 		this.useAction = useAction;
 		this.foodRemainder = foodRemainder;
-		this.foodComponent = foodComponentExt;
+		foodComponent = foodComponentExt;
 	}
 
 	@Override
@@ -65,18 +66,18 @@ public final class ExtensibleFoodCropItem extends AliasedBlockItem {
 	}
 
 	@Override
-	public int getMaxUseTime(ItemStack stack) {
+	public int getMaxUseTime(final ItemStack stack) {
 		return foodComponent == null ? super.getMaxUseTime(stack)
 				: foodComponent.eatTime == null ? super.getMaxUseTime(stack) : foodComponent.eatTime;
 	}
 
 	@Override
-	public UseAction getUseAction(ItemStack stack) {
+	public UseAction getUseAction(final ItemStack stack) {
 		return useAction == null ? super.getUseAction(stack) : useAction;
 	}
 
 	@Override
-	public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
+	public ItemStack finishUsing(final ItemStack stack, final World world, final LivingEntity user) {
 		final ItemStack remaining = super.finishUsing(stack, world, user);
 		final boolean p = user instanceof PlayerEntity;
 

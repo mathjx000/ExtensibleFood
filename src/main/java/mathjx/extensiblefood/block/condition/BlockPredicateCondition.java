@@ -20,7 +20,7 @@ public final class BlockPredicateCondition extends BlockStayCondition {
 	@Override
 	public boolean test(final BlockState state, final World world, final BlockPos pos) {
 //		try {
-			return predicate/*predicate.create(world.getTagManager())*/.test(new CachedBlockPosition(world, pos.add(offset), false));
+		return predicate/* predicate.create(world.getTagManager()) */.test(new CachedBlockPosition(world, pos.add(offset), false));
 //		} catch (final CommandSyntaxException e) {
 //			e.printStackTrace();
 //			return false;

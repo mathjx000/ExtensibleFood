@@ -2,6 +2,7 @@ package mathjx.extensiblefood.block.condition;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -86,7 +87,7 @@ public abstract class BlockStayCondition {
 	 * @throws JsonParseException if any syntax errors occurs
 	 */
 	public static BlockStayCondition parseCondition(final JsonObject jsonCondition,
-			CommandRegistryAccess commandRegistryAccess) throws JsonParseException {
+			final CommandRegistryAccess commandRegistryAccess) throws JsonParseException {
 		final String conditionName = JsonHelper.getString(jsonCondition, "condition");
 		final ConditionDeserializer deserializer = DESERIALIZERS.get(conditionName);
 
@@ -209,9 +210,9 @@ public abstract class BlockStayCondition {
 
 	/**
 	 * Creates a compound NAND condition
-	 * 
+	 *
 	 * @param conditions the conditions
-	 * 
+	 *
 	 * @return
 	 */
 	public static BlockStayCondition createCompoundNAND(final BlockStayCondition... conditions) {

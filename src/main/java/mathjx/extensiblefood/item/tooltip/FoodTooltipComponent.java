@@ -20,7 +20,7 @@ public final class FoodTooltipComponent implements TooltipData, TooltipComponent
 
 	private final FoodComponent food;
 
-	public FoodTooltipComponent(FoodComponent food) {
+	public FoodTooltipComponent(final FoodComponent food) {
 		this.food = food;
 	}
 
@@ -30,13 +30,13 @@ public final class FoodTooltipComponent implements TooltipData, TooltipComponent
 	}
 
 	@Override
-	public int getWidth(TextRenderer textRenderer) {
+	public int getWidth(final TextRenderer textRenderer) {
 		return Math.max((food.getHunger() + 1) / 2 * FULL_UNIT_WIDTH, (int) (food.getHunger() * food.getSaturationModifier() * FULL_UNIT_WIDTH));
 	}
 
 	@Override
-	public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer,
-			int z) {
+	public void drawItems(final TextRenderer textRenderer, final int x, final int y, final MatrixStack matrices,
+			final ItemRenderer itemRenderer, final int z) {
 		// TODO: support of mixing with others components
 		// TODO: support of effect display
 
@@ -47,7 +47,7 @@ public final class FoodTooltipComponent implements TooltipData, TooltipComponent
 		for (i = 0, j = (food.getHunger() + 1) / 2; i < j; i++) DrawableHelper.drawTexture(matrices, x + i * FULL_UNIT_WIDTH, y, 0, 0, FULL_UNIT_WIDTH, FULL_UNIT_WIDTH, 32, 32);
 
 		// Then draw the saturation background
-		float saturationWidth = food.getHunger() * food.getSaturationModifier();
+		final float saturationWidth = food.getHunger() * food.getSaturationModifier();
 		for (i = 0; i < saturationWidth; i++) {
 			int w = FULL_UNIT_WIDTH;
 			if (saturationWidth - i < 1f) w = Math.round(w * (saturationWidth - i));

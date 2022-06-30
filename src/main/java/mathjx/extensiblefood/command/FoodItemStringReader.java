@@ -29,7 +29,7 @@ public final class FoodItemStringReader {
 
 	private boolean suggest = true;
 
-	public FoodItemStringReader(CommandRegistryWrapper<Item> registryWrapper, StringReader reader) {
+	public FoodItemStringReader(final CommandRegistryWrapper<Item> registryWrapper, final StringReader reader) {
 		this.registryWrapper = registryWrapper;
 		this.reader = reader;
 	}

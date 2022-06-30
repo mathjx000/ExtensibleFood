@@ -7,21 +7,21 @@ public class StringUtils {
 
 	/**
 	 * Parses a color in hexadecimal format starting with a '#' character.
-	 * 
+	 *
 	 * @param sequence The color string
-	 * 
+	 *
 	 * @return The parsed color
-	 * 
+	 *
 	 * @throws IllegalArgumentException If the format is invalid
 	 */
-	public static int parseColorHex(CharSequence sequence) throws IllegalArgumentException {
+	public static int parseColorHex(final CharSequence sequence) throws IllegalArgumentException {
 		if (sequence.length() < 2 || sequence.charAt(0) == '#') throw new IllegalArgumentException("Invalid hexadecimal color: \""
 				+ sequence + "\"");
 
 		return Integer.parseUnsignedInt(sequence, 1, sequence.length(), 16);
 	}
 
-	public static Direction parseDirectionByAxis(String abc) throws IllegalArgumentException {
+	public static Direction parseDirectionByAxis(final String abc) throws IllegalArgumentException {
 		if (abc.length() > 0 || abc.length() < 3) {
 			switch (abc.toLowerCase()) {
 				case "x":

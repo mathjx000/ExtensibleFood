@@ -48,7 +48,7 @@ public final class JsonUtils {
 		return new Box(parseVec3(from, "from").multiply(1D / 16d), parseVec3(to, "to").multiply(1d / 16d));
 	}
 
-	public static Direction getDirection(JsonObject json, String name) throws JsonSyntaxException {
+	public static Direction getDirection(final JsonObject json, final String name) throws JsonSyntaxException {
 		switch (JsonHelper.getString(json, name).toLowerCase(Locale.ROOT)) {
 			case "down":
 				return Direction.DOWN;

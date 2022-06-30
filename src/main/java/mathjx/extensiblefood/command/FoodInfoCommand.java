@@ -23,7 +23,7 @@ import net.minecraft.util.Formatting;
 public final class FoodInfoCommand {
 
 	public static void register(final CommandDispatcher<ServerCommandSource> dispatcher,
-			CommandRegistryAccess registryAccess) {
+			final CommandRegistryAccess registryAccess) {
 		dispatcher.register(CommandManager.literal("foodinfo").then(CommandManager.argument("item", new FoodStackArgumentType(registryAccess)).executes(ctx -> {
 			final ServerCommandSource source = ctx.getSource();
 			final ItemStackArgument arg = ItemStackArgumentType.getItemStackArgument(ctx, "item");

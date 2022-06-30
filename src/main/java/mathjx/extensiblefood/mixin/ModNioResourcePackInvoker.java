@@ -18,8 +18,8 @@ import net.minecraft.resource.ResourceType;
 public interface ModNioResourcePackInvoker {
 
 	@Invoker(value = "<init>")
-	public static ModNioResourcePack ModNioResourcePack(String name, ModMetadata modInfo, List<Path> paths,
-			ResourceType type, AutoCloseable closer, ResourcePackActivationType activationType) {
+	public static ModNioResourcePack ModNioResourcePack(final String name, final ModMetadata modInfo, final List<Path> paths,
+			final ResourceType type, final AutoCloseable closer, final ResourcePackActivationType activationType) {
 		throw new AssertionError();
 	}
 

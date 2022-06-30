@@ -21,10 +21,10 @@ public final class ExtensibleResourcePackRegisterer {
 //	private static final ResourcePackSource RESOURCE_PACK_SOURCE = ModResourcePackCreator.RESOURCE_PACK_SOURCE;
 
 	@Inject(method = "appendModResourcePacks", at = @At(value = "RETURN"), remap = false)
-	private static void register(List<ModResourcePack> packs, ResourceType type, @Nullable String subPath,
-			final CallbackInfo cb) {
+	private static void register(final List<ModResourcePack> packs, final ResourceType type,
+			@Nullable final String subPath, final CallbackInfo cb) {
 		if (subPath == null || subPath == "user_extension") {
-			ModResourcePack pack = ModNioResourcePackInvoker.ModNioResourcePack("extension_pack", ExtensibleFood.METADATA, Collections.singletonList(ExtensibleFood.COMMON_RESOURCEPACK_DIR), type, null, ResourcePackActivationType.ALWAYS_ENABLED);
+			final ModResourcePack pack = ModNioResourcePackInvoker.ModNioResourcePack("extension_pack", ExtensibleFood.METADATA, Collections.singletonList(ExtensibleFood.COMMON_RESOURCEPACK_DIR), type, null, ResourcePackActivationType.ALWAYS_ENABLED);
 
 //			UserExtensionResourcePack pack = new UserExtensionResourcePack();
 

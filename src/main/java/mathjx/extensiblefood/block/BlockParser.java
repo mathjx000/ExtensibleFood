@@ -53,24 +53,18 @@ public final class BlockParser {
 	static IntProperty BRUH;
 
 	public static synchronized Block parseBlock(final JsonObject jsonBlock, final ExtendedFoodComponent foodComponent,
-			CommandRegistryAccess commandRegistryAccess) throws JsonSyntaxException {
+			final CommandRegistryAccess commandRegistryAccess) throws JsonSyntaxException {
 		final BlockType type;
 		{
 			if (!jsonBlock.has("type")) {
 				LOGGER.warn("Missing " + "type" + ", expected to find String 'consumable' or 'crop'");
 				type = BlockType.CONSUMABLE;
-			} else switch (getString(jsonBlock, "type")) {
-				case "consumable":
-					type = BlockType.CONSUMABLE;
-					break;
+			} else type = switch (getString(jsonBlock, "type")) {
+				case "consumable" -> BlockType.CONSUMABLE;
+				case "crop" -> BlockType.CROP;
 
-				case "crop":
-					type = BlockType.CROP;
-					break;
-
-				default:
-					throw new JsonSyntaxException("Unexpected Block type expected to be \"consumable\" or \"crop\", got noting");
-			}
+				default -> throw new JsonSyntaxException("Unexpected Block type expected to be \"consumable\" or \"crop\", got noting");
+			};
 		}
 
 		final Material material;
@@ -131,26 +125,14 @@ public final class BlockParser {
 
 		RenderLayer renderLayer;
 		if (IS_CLIENT && jsonBlock.has("render_mode")) {
-			switch (asString(jsonBlock, "render_mode").toLowerCase(Locale.ROOT)) {
-				case "cutout":
-					renderLayer = RenderLayer.getCutout();
-					break;
+			renderLayer = switch (asString(jsonBlock, "render_mode").toLowerCase(Locale.ROOT)) {
+				case "cutout" -> RenderLayer.getCutout();
+				case "cutout_mipped" -> RenderLayer.getCutoutMipped();
+				case "translucent" -> RenderLayer.getTranslucent();
+				case "solid" -> RenderLayer.getSolid();
 
-				case "cutout_mipped":
-					renderLayer = RenderLayer.getCutoutMipped();
-					break;
-
-				case "translucent":
-					renderLayer = RenderLayer.getTranslucent();
-					break;
-
-				case "solid":
-					renderLayer = RenderLayer.getSolid();
-					break;
-
-				default:
-					throw new JsonSyntaxException("Unexpected render_mode, expected string 'cutout', 'cutout_mipped', 'translucent' and 'solid'");
-			}
+				default -> throw new JsonSyntaxException("Unexpected render_mode, expected string 'cutout', 'cutout_mipped', 'translucent' and 'solid'");
+			};
 		} else renderLayer = null;
 
 		Block constructed;
@@ -278,8 +260,8 @@ public final class BlockParser {
 			LOGGER.warn("Using raw material names is deprecated and will be removed in the future.");
 
 			/*
-			 * Don't say any thing... Just cry.
-			 * 
+			 * Don't say anything... Just cry.
+			 *
 			 * Due to its difficulty to maintain correct names this option is considered
 			 * deprecated and may be removed someday.
 			 */
@@ -432,14 +414,14 @@ public final class BlockParser {
 			final JsonObject object = asObject(jsonMaterial, "material");
 
 			if (object.has("copy_from_block")) {
-				Identifier blockId = new Identifier(JsonHelper.getString(object, "copy_from_block"));
+				final Identifier blockId = new Identifier(JsonHelper.getString(object, "copy_from_block"));
 
-				Block block = Registry.BLOCK.get(blockId);
+				final Block block = Registry.BLOCK.get(blockId);
 
 				if (block == null) throw new JsonParseException("No block found with the id: \"" + blockId + '"');
 
 				// Here we take advantage of mixin accessors provided by the Fabric API...
-				return ((AbstractBlockSettingsAccessor) (Object) ((AbstractBlockAccessor) (Object) block).getSettings()).getMaterial();
+				return ((AbstractBlockSettingsAccessor) ((AbstractBlockAccessor) block).getSettings()).getMaterial();
 			} else {
 				MapColor color;
 				{
@@ -465,30 +447,15 @@ public final class BlockParser {
 				if (object.has("piston_behavior")) {
 					final String behavior = getString(object, "piston_behavior");
 
-					switch (behavior.toLowerCase(Locale.ROOT)) {
-						case "normal":
-							pistonBehavior = PistonBehavior.NORMAL;
-							break;
+					pistonBehavior = switch (behavior.toLowerCase(Locale.ROOT)) {
+						case "normal" -> PistonBehavior.NORMAL;
+						case "destroy" -> PistonBehavior.DESTROY;
+						case "block" -> PistonBehavior.BLOCK;
+						case "ignore" -> PistonBehavior.IGNORE;
+						case "push_only" -> PistonBehavior.PUSH_ONLY;
 
-						case "destroy":
-							pistonBehavior = PistonBehavior.DESTROY;
-							break;
-
-						case "block":
-							pistonBehavior = PistonBehavior.BLOCK;
-							break;
-
-						case "ignore":
-							pistonBehavior = PistonBehavior.IGNORE;
-							break;
-
-						case "push_only":
-							pistonBehavior = PistonBehavior.PUSH_ONLY;
-							break;
-
-						default:
-							throw new JsonParseException("Invalid piston_behavior: '" + pistonBehavior + "'");
-					}
+						default -> throw new JsonParseException("Invalid piston_behavior: '" + pistonBehavior + "'");
+					};
 				}
 
 				return new Material(color, false, getBoolean(object, "solid", true), getBoolean(object, "blocks_movement", true), getBoolean(object, "block_light", false), getBoolean(object, "break_by_hand", true), getBoolean(object, "burnable", false), pistonBehavior);

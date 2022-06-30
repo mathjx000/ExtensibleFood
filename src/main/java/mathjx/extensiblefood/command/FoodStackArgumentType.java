@@ -23,8 +23,8 @@ public final class FoodStackArgumentType implements ArgumentType<ItemStackArgume
 
 	private final CommandRegistryWrapper<Item> registryWrapper;
 
-	public FoodStackArgumentType(CommandRegistryAccess commandRegistryAccess) {
-		this.registryWrapper = commandRegistryAccess.createWrapper(Registry.ITEM_KEY);
+	public FoodStackArgumentType(final CommandRegistryAccess commandRegistryAccess) {
+		registryWrapper = commandRegistryAccess.createWrapper(Registry.ITEM_KEY);
 	}
 
 	@Override

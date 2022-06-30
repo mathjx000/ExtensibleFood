@@ -14,7 +14,7 @@ public final class FoodTooltipComponentCallback implements TooltipComponentCallb
 	public FoodTooltipComponentCallback() {}
 
 	@Override
-	public @Nullable TooltipComponent getComponent(TooltipData data) {
+	public @Nullable TooltipComponent getComponent(final TooltipData data) {
 		if (data instanceof FoodTooltipComponent) return (TooltipComponent) data;
 		return null;
 	}

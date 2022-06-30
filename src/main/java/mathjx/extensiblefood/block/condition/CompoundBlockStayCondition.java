@@ -68,12 +68,12 @@ abstract class CompoundBlockStayCondition extends BlockStayCondition {
 
 	static class NAND_Condition extends AND_Condition {
 
-		NAND_Condition(BlockStayCondition[] conditions) {
+		NAND_Condition(final BlockStayCondition[] conditions) {
 			super(conditions);
 		}
 
 		@Override
-		public boolean test(BlockState state, World world, BlockPos pos) {
+		public boolean test(final BlockState state, final World world, final BlockPos pos) {
 			return !super.test(state, world, pos);
 		}
 
