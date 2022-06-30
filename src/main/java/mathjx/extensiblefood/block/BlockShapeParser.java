@@ -59,7 +59,7 @@ public final class BlockShapeParser {
 			final VoxelShape base = parseStateShape(jsonShapes.get("base"), "base");
 			final Direction dir = JsonUtils.getDirection(jsonShapes, "direction");
 
-			return msliceBaseShape(base, expectedShapeCount, dir);
+			return generateSlicedShapes(base, expectedShapeCount, dir);
 		}
 
 		final VoxelShape[] shapes = new VoxelShape[expectedShapeCount];
@@ -77,11 +77,18 @@ public final class BlockShapeParser {
 		return shapes;
 	}
 
-	private static VoxelShape[] msliceBaseShape(final VoxelShape shape, int slices, Direction direction) {
-		direction = direction.getOpposite();
-
-		final VoxelShape[] shapes = new VoxelShape[slices];
-		final Box bb = shape.getBoundingBox();
+	/**
+	 * Generates slices shapes based on <code>baseShape</code> like Minecraft Cake.
+	 * 
+	 * @param baseShape The base {@link VoxelShape shape}
+	 * @param sliceCount    The number of slices to cut
+	 * @param direction The direction of the slicing process
+	 * 
+	 * @return Progressively sliced shapes
+	 */
+	private static VoxelShape[] generateSlicedShapes(final VoxelShape baseShape, final int sliceCount, final Direction direction) {
+		final VoxelShape[] shapes = new VoxelShape[sliceCount];
+		final Box bb = baseShape.getBoundingBox();
 
 		// direction vector
 		final Vec3i vec3i = direction.getVector();
@@ -93,22 +100,21 @@ public final class BlockShapeParser {
 				bz = direction == Direction.NORTH ? bb.maxZ : bb.minZ;
 
 		// vec3i gives the masking and the direction
-		final double dx = bb.getXLength() / slices * vec3i.getX(),
-				dy = bb.getYLength() / slices * vec3i.getY(),
-				dz = bb.getZLength() / slices * vec3i.getZ();
+		final double dx = bb.getXLength() / sliceCount * vec3i.getX(),
+				dy = bb.getYLength() / sliceCount * vec3i.getY(),
+				dz = bb.getZLength() / sliceCount * vec3i.getZ();
 
 		double mx = bb.maxX * dirMaskInv.getX() + bx * Math.abs(vec3i.getX()) + dx,
 				my = bb.maxY * dirMaskInv.getY() + by * Math.abs(vec3i.getY()) + dy,
 				mz = bb.maxZ * dirMaskInv.getZ() + bz * Math.abs(vec3i.getZ()) + dz;
 
-		slices--;
-		for (int i = slices - 1; i >= 0; i--) {
-			shapes[i] = VoxelShapes.combine(shape, VoxelShapes.cuboid(bx, by, bz, mx, my, mz), BooleanBiFunction.ONLY_FIRST);
+		shapes[0] = baseShape; // the first shape is the full shape
+		for (int i = 1; i < sliceCount; i++) {
+			shapes[i] = VoxelShapes.combine(baseShape, VoxelShapes.cuboid(Math.min(bx, mx), Math.min(by, my), Math.min(bz, mz), Math.max(bx, mx), Math.max(by, my), Math.max(bz, mz)), BooleanBiFunction.ONLY_FIRST);
 			mx += dx;
 			my += dy;
 			mz += dz;
 		}
-		shapes[slices] = shape; // the last shape is the full shape
 
 		return shapes;
 	}
@@ -123,23 +129,6 @@ public final class BlockShapeParser {
 	 * @throws JsonSyntaxException if any syntax error occurs
 	 */
 	private static VoxelShape parseSingleShape(final JsonObject jsonShape) throws JsonSyntaxException {
-//		final double x1, y1, z1, x2, y2, z2;
-//
-//		JsonArray vectorArray = JsonHelper.getArray(jsonShape, "from");
-//		if (vectorArray.size() != 3) throw new JsonSyntaxException("Expected array 'from' to be of length 3");
-//
-//		x1 = (double) JsonHelper.asFloat(vectorArray.get(0), "from[0]");
-//		y1 = (double) JsonHelper.asFloat(vectorArray.get(1), "from[1]");
-//		z1 = (double) JsonHelper.asFloat(vectorArray.get(2), "from[2]");
-//
-//		vectorArray = JsonHelper.getArray(jsonShape, "to");
-//		if (vectorArray.size() != 3) throw new JsonSyntaxException("Expected array 'to' to be of length 3");
-//
-//		x2 = (double) JsonHelper.asFloat(vectorArray.get(0), "to[0]");
-//		y2 = (double) JsonHelper.asFloat(vectorArray.get(1), "to[1]");
-//		z2 = (double) JsonHelper.asFloat(vectorArray.get(2), "to[2]");
-
-//		return VoxelShapes.cuboid(x1 / 16.0D, y1 / 16.0D, z1 / 16.0D, x2 / 16.0D, y2 / 16.0D, z2 / 16.0D);
 		return VoxelShapes.cuboid(JsonUtils.parseBox016(jsonShape));
 	}
 
