@@ -13,7 +13,6 @@ import static net.minecraft.util.JsonHelper.isNumber;
 
 import java.util.Locale;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -96,28 +95,12 @@ public final class BlockParser {
 			// @formatter:on
 		} else if (type == BlockType.CROP) settings.sounds(BlockSoundGroup.CROP);
 
-		BlockStayCondition stayCondition;
-		if (jsonBlock.has("placement_conditions")) {
-			final JsonElement jsonCondition = jsonBlock.get("placement_conditions");
-
-			if (jsonCondition.isJsonArray()) {
-				final JsonArray array = jsonCondition.getAsJsonArray();
-				final int len = array.size();
-
-				if (len == 0) {
-					stayCondition = null;
-				} else {
-					final BlockStayCondition[] conditions = new BlockStayCondition[len];
-
-					for (int i = 0; i < len; i++) {
-						conditions[i] = BlockStayCondition.parseCondition(asObject(array.get(i), "placement_conditions["
-								+ i + '\''), commandRegistryAccess);
-					}
-
-					stayCondition = BlockStayCondition.createCompoundAND(conditions);
-				}
-			} else stayCondition = BlockStayCondition.parseCondition(asObject(jsonCondition, "placement_conditions"), commandRegistryAccess);
-		} else stayCondition = null;
+		if (jsonBlock.has("placement_conditions"))
+			throw new JsonSyntaxException("Property 'placement_conditions' is no longer accepted, use 'placement_condition' instead");
+		
+		BlockStayCondition stayCondition = jsonBlock.has("placement_condition")
+				? BlockStayCondition.parseCondition(JsonHelper.getObject(jsonBlock, "placement_condition"), commandRegistryAccess)
+						: null;
 
 		final ParticleEmission particleEmission = jsonBlock.has("particles")
 				? ParticleEmission.parseParticleEmission(jsonBlock.get("particles")) : null;

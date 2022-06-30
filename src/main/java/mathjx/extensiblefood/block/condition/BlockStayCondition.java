@@ -69,10 +69,30 @@ public abstract class BlockStayCondition {
 				case "center" -> SideShapeType.CENTER;
 				case "rigid" -> SideShapeType.RIGID;
 
-				default -> throw new IllegalArgumentException("Unexpected side_shape_type value: " + faceShapeTypeName);
+				default -> throw new JsonSyntaxException("Unexpected side_shape_type value: " + faceShapeTypeName);
 			};
 
 			return new IsBlockSideSolidCondition(side, sideShapeType);
+		});
+		DESERIALIZERS.put("compound", (json, commandRegistryAccess) -> {
+			String type = JsonHelper.getString(json, "type", "or").toLowerCase();
+			
+			JsonArray jsonComponents = JsonHelper.getArray(json, "components");
+			
+			BlockStayCondition[] conditions = new BlockStayCondition[jsonComponents.size()];
+			
+			for (int i = 0; i < conditions.length; i++) {
+				conditions[i] =  parseCondition(JsonHelper.asObject(jsonComponents.get(i), "components[" + Integer.toString(i) + ']'), commandRegistryAccess);
+			}
+			
+			return switch (type) {
+				case "and" -> createCompoundAND(conditions);
+				case "or" -> createCompoundOR(conditions);
+				case "xor" -> createCompoundXOR(conditions);
+				case "nand" -> createCompoundNAND(conditions);
+				
+				default -> throw new JsonSyntaxException("Unexpected 'type' value: " + type);
+			};
 		});
 	}
 
@@ -94,82 +114,11 @@ public abstract class BlockStayCondition {
 		if (deserializer == null) {
 			throw new JsonParseException("Unknown condition '" + conditionName + "'");
 		} else {
-			int len = 1;
-			// all condition including null if no extra conditions
-			final BlockStayCondition[] conditions = new BlockStayCondition[5];
-
 			try {
-				conditions[0] = deserializer.deserialize(jsonCondition, commandRegistryAccess);
+				return deserializer.deserialize(jsonCondition, commandRegistryAccess);
 			} catch (final CommandSyntaxException e) {
 				throw new JsonSyntaxException(e);
 			}
-
-			BlockStayCondition[] subConditions;
-			JsonArray array;
-
-			if (jsonCondition.has("and")) {
-				array = JsonHelper.getArray(jsonCondition, "and");
-
-				if (array.size() > 0) {
-					subConditions = new BlockStayCondition[array.size()];
-
-					for (int i = 0; i < subConditions.length; i++) {
-						subConditions[i] = parseCondition(JsonHelper.asObject(array.get(i), "and[" + i
-								+ ']'), commandRegistryAccess);
-					}
-
-					conditions[len++] = subConditions.length == 1 ? subConditions[0] : createCompoundAND(subConditions);
-				}
-			}
-
-			if (jsonCondition.has("or")) {
-				array = JsonHelper.getArray(jsonCondition, "or");
-
-				if (array.size() > 0) {
-					subConditions = new BlockStayCondition[array.size()];
-
-					for (int i = 0; i < subConditions.length; i++) {
-						subConditions[i] = parseCondition(JsonHelper.asObject(array.get(i), "or[" + i
-								+ ']'), commandRegistryAccess);
-					}
-
-					conditions[len++] = subConditions.length == 1 ? subConditions[0] : createCompoundOR(subConditions);
-				}
-			}
-
-			if (jsonCondition.has("xor")) {
-				array = JsonHelper.getArray(jsonCondition, "xor");
-
-				if (array.size() > 0) {
-					subConditions = new BlockStayCondition[array.size()];
-
-					for (int i = 0; i < subConditions.length; i++) {
-						subConditions[i] = parseCondition(JsonHelper.asObject(array.get(i), "xor[" + i
-								+ ']'), commandRegistryAccess);
-					}
-
-					conditions[len++] = subConditions.length == 1 ? subConditions[0] : createCompoundXOR(subConditions);
-				}
-			}
-
-			if (jsonCondition.has("nand")) {
-				array = JsonHelper.getArray(jsonCondition, "nand");
-
-				if (array.size() > 0) {
-					subConditions = new BlockStayCondition[array.size()];
-
-					for (int i = 0; i < subConditions.length; i++) {
-						subConditions[i] = parseCondition(JsonHelper.asObject(array.get(i), "nand[" + i
-								+ ']'), commandRegistryAccess);
-					}
-
-					conditions[len++] = createCompoundNAND(subConditions);
-				}
-			}
-
-			if (len == 1) {
-				return conditions[0];
-			} else return createCompoundAND(conditions);
 		}
 	}
 
