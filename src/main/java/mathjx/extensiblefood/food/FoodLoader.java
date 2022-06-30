@@ -60,19 +60,22 @@ public final class FoodLoader {
 		if (file.has("item")) {
 			JsonObject jsonItem = JsonHelper.getObject(file, "item");
 			
+			Pair<Identifier, ? extends Item> item; 
 			if (jsonItem.has("additional_crop_item")) {
 				if (block == null || !(block.getRight() instanceof CropFoodBlock)) throw new JsonSyntaxException("Object 'additional_crop_item' is invalid in this context.");
 				
 				final JsonObject jsonCropItem = JsonHelper.getObject(jsonItem, "additional_crop_item");
-				final Pair<Identifier, BlockItem> pair = parseItemBlock(jsonCropItem, autoId, block.getRight());
+				final Pair<Identifier, BlockItem> cropItem = parseItemBlock(jsonCropItem, autoId, block.getRight());
 				// then parse the crop item as a item block
 				doRegister(Registry.ITEM,
-						pair.getLeft() == null ? new Identifier(autoId.toString() + "_seeds") : pair.getLeft(),
-						pair.getRight());
-			}
+						cropItem.getLeft() == null ? new Identifier(autoId.toString() + "_seeds") : cropItem.getLeft(),
+						cropItem.getRight());
+				
+				item = parseFoodItem(jsonItem, autoId, foodComponent);
+			} else if (block != null) item = parseItemBlock(jsonItem, autoId, block.getRight());
+			else item = parseFoodItem(jsonItem, autoId, foodComponent);
 			
-			Pair<Identifier, Item> pair = parseFoodItem(jsonItem, autoId, foodComponent, null);
-			doRegister(Registry.ITEM, pair.getLeft(), pair.getRight());
+			doRegister(Registry.ITEM, item.getLeft(), item.getRight());
 		}
 	}
 
@@ -192,8 +195,7 @@ public final class FoodLoader {
 	//// FoodItem
 	//
 
-	private Pair<Identifier, Item> parseFoodItem(final JsonObject jsonItem, final Identifier autoId, final ExtendedFoodComponent foodComponent,
-			final Block block) throws JsonParseException {
+	private Pair<Identifier, Item> parseFoodItem(final JsonObject jsonItem, final Identifier autoId, final ExtendedFoodComponent foodComponent) throws JsonParseException {
 		final CommonItemProperties props =  parseCommonItemProperties(jsonItem, autoId, ItemGroup.FOOD);
 
 		final UseAction itemUseAction;
@@ -216,9 +218,7 @@ public final class FoodLoader {
 		props.settings.food(foodComponent.food);
 
 		// Build the item
-		final Item item = block == null
-				? new ExtensibleFoodItem(props.settings, props.name, props.description, itemUseAction, props.glint, itemConsumeRemainder, foodComponent)
-				: new ExtensibleFoodCropItem(block, props.settings, props.name, props.description, props.glint, itemUseAction, itemConsumeRemainder, foodComponent);
+		final Item item = new ExtensibleFoodItem(props.settings, props.name, props.description, itemUseAction, props.glint, itemConsumeRemainder, foodComponent);
 
 		props.registerComposterValue(item);
 		
