@@ -4,7 +4,6 @@ import static mathjx.extensiblefood.ExtensibleFood.IS_CLIENT;
 import static mathjx.extensiblefood.ExtensibleFood.LOGGER;
 import static net.minecraft.util.JsonHelper.asFloat;
 import static net.minecraft.util.JsonHelper.asObject;
-import static net.minecraft.util.JsonHelper.asString;
 import static net.minecraft.util.JsonHelper.getBoolean;
 import static net.minecraft.util.JsonHelper.getFloat;
 import static net.minecraft.util.JsonHelper.getInt;
@@ -125,7 +124,7 @@ public final class BlockParser {
 
 		RenderLayer renderLayer;
 		if (IS_CLIENT && jsonBlock.has("render_mode")) {
-			renderLayer = switch (asString(jsonBlock, "render_mode").toLowerCase(Locale.ROOT)) {
+			renderLayer = switch (getString(jsonBlock, "render_mode").toLowerCase(Locale.ROOT)) {
 				case "cutout" -> RenderLayer.getCutout();
 				case "cutout_mipped" -> RenderLayer.getCutoutMipped();
 				case "translucent" -> RenderLayer.getTranslucent();
