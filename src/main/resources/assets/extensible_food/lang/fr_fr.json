@@ -1,5 +1,5 @@
 {
-	"extensible_food.errorScreen.title": "Extensible Food - Erreurs Detectées",
+	"extensible_food.errorScreen.title": "Extensible Food - Erreurs Détectées",
 	"extensible_food.errorScreen.error.hidden": "%d autres...",
 	"commands.extensible_food.foodinfo.info_header": "Informations de nutrition pour l'objet %s:",
 	"commands.extensible_food.foodinfo.entry_hunger": " - Satiété: %s",
