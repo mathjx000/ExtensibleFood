@@ -1,0 +1,37 @@
+{
+	"food": {
+		"base": "minecraft:beef"
+	},
+	
+	"item": {
+		"id": "dev_pack:food3_but_the_fruit",
+		"name": { "translate": "item.dev_pack.food3.fruit" },
+		
+		"additional_crop_item": {
+			"id": "dev_pack:food3_seeds_of_life_u_know",
+			
+			"name": { "translate": "item.dev_pack.food3.seeds" }
+		}
+	},
+	
+	"block": {
+		"type": "crop",
+		"strength": {
+			"hardness": 1,
+			"resistance": 1
+		},
+		"shapes": {
+			"default": {
+				"from": [ 0, 0, 0 ],
+				"to": [ 16, 16, 16 ]
+			}
+		},
+		"collision_effects": {
+			"type": "slow_movement",
+			"multiplier": [ 0.5, 0.5, 0.5 ]
+		},
+		
+		"max_age": 3,
+		"fertilizable": true
+	}
+}

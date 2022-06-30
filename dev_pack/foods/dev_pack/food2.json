@@ -1,0 +1,85 @@
+{
+	"food": {
+		"base": "minecraft:potato",
+		
+		"always_edible": true,
+		"meat": true,
+		"eat_sound": "block.anvil.place"
+	},
+	
+	"item": {
+		"name": [
+			{ "translate": "item.dev_pack.food2", "with": [
+				{ "selector": "@s" },
+				{ "keybind": "key.inventory" }
+			] },
+			" ",
+			{ "text": "dummy text", "color": "blue", "underlined": true, "font": "minecraft:illageralt" }
+		]
+	},
+	
+	"block": {
+		"type": "consumable",
+		"material": {
+			"copy_from_block": "minecraft:cake"
+		},
+		"strength": {
+			"hardness": 5,
+			"resistance": 999
+		},
+		"sounds": {
+			"break_sound": "block.amethyst_cluster.hit",
+			"step_sound": "block.amethyst_cluster.fall",
+			"place_sound": "block.amethyst_cluster.break",
+			"hit_sound": "block.amethyst_block.step",
+			"fall_sound": "block.amethyst_block.place"
+		},
+		"shapes": {
+			"base": {
+				"from": [ 1, 1, 1 ],
+				"to": [ 15, 15, 15 ]
+			},
+			"direction": "down"
+		},
+		"lights": {
+			"default": 7,
+			"1": 5,
+			"2": 10,
+			"3": 15
+		},
+		"particles": {
+			"box": {
+				"from": [ 0, 15, 0 ],
+				"to": [ 16, 16, 16 ]
+			},
+			"batch_chance": 0.25,
+			"per_batch_amount": 20,
+			"chance": 0.75,
+			"particle": "block minecraft:andesite",
+			"velocity_random": {
+				"x": 0.01,
+				"y": 0.01,
+				"z": 0.01
+			}
+		},
+		"placement_condition": {
+			"condition": "compound",
+			"type": "or",
+			"components": [
+				{
+					"condition": "is_side_solid",
+					"side": "down",
+					"shape_type": "rigid"
+				},
+				{
+					"condition": "block_predicate",
+					"offset": [ 0, -1, 0 ],
+					"predicate": "minecraft:torch"
+				}
+			]
+		},
+		"render_mode": "translucent",
+		
+		"bites": 3
+	}
+}

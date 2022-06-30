@@ -1,0 +1,7 @@
+{
+	"parent": "minecraft:item/generated",
+	"textures": {
+		"layer0": "minecraft:block/debug",
+		"layer1": "minecraft:item/wheat_seeds"
+	}
+}

@@ -1,0 +1,46 @@
+{
+	"food": {
+		"hunger": 2,
+		"saturation": 1,
+		
+		"always_edible": true,
+		"meat": true,
+		"shack": true,
+		"eat_time": 10,
+		"eat_sound": "block.amethyst_block.break",
+		"effects": [
+			{
+				"id": "minecraft:jump_boost",
+				"chance": 0.5,
+				"duration": 200,
+				"amplifier": 15,
+				"ambient": false,
+				"show_particles": false,
+				"show_icon": true,
+				
+				"hidden_effect": {
+					"id": "minecraft:poison",
+					"duration": 20,
+					"ambient": true,
+					"show_particles": true,
+					"show_icon": true
+				}
+			}
+		]
+	},
+	
+	"item": {
+		"group": "redstone",
+		"max_count": 33,
+		"name": "raw name | this is bad dont do this for real objects",
+		"description": "again, raw text for testing purposes...",
+		"rarity": "rare",
+		"glint": true,
+		"fireproof": true,
+		"recipe_remainder": "minecraft:stone",
+		"composter": 0.75,
+		
+		"action": "drink",
+		"consume_remainder": "minecraft:candle"
+	}
+}
