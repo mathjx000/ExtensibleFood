@@ -40,6 +40,7 @@ import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
+import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.shape.VoxelShape;
 
@@ -51,8 +52,10 @@ public final class BlockParser {
 	@Deprecated
 	static IntProperty BRUH;
 
-	public static synchronized Block parseBlock(final JsonObject jsonBlock, final ExtendedFoodComponent foodComponent,
+	public static synchronized Pair<Identifier, Block> parseBlock(final JsonObject jsonBlock, Identifier blockId, final ExtendedFoodComponent foodComponent,
 			final CommandRegistryAccess commandRegistryAccess) throws JsonSyntaxException {
+		if (jsonBlock.has("id")) blockId = new Identifier(JsonHelper.getString(jsonBlock, "id"));
+		
 		final BlockType type;
 		{
 			if (!jsonBlock.has("type")) {
@@ -62,7 +65,7 @@ public final class BlockParser {
 				case "consumable" -> BlockType.CONSUMABLE;
 				case "crop" -> BlockType.CROP;
 
-				default -> throw new JsonSyntaxException("Unexpected Block type expected to be \"consumable\" or \"crop\", got noting");
+				default -> throw new JsonSyntaxException("Unexpected Block type expected to be \"consumable\" or \"crop\", got something invalid");
 			};
 		}
 
@@ -153,7 +156,7 @@ public final class BlockParser {
 
 		if (renderLayer != null) RenderLayerAccess.getBlocksMappedLayers().put(constructed, renderLayer);
 
-		return constructed;
+		return new Pair<>(blockId, constructed);
 	}
 
 	private static ConsumableFoodBlock parseConsumableFoodBlock(final JsonObject jsonBlock,
