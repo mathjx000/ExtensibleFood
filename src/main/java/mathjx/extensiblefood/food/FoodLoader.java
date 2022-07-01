@@ -77,14 +77,14 @@ public final class FoodLoader {
 				if (block == null || !(block.getRight() instanceof CropFoodBlock)) throw new JsonSyntaxException("Object 'additional_crop_item' is invalid in this context.");
 				
 				final JsonObject jsonCropItem = JsonHelper.getObject(jsonItem, "additional_crop_item");
-				final Pair<Identifier, BlockItem> cropItem = parseItemBlock(jsonCropItem, autoId, block.getRight());
+				final Pair<Identifier, BlockItem> cropItem = parseItemBlock(jsonCropItem, autoId, block.getRight(), ItemGroup.MISC);
 				// then parse the crop item as a item block
 				doRegister(Registry.ITEM,
 						cropItem.getLeft() == null ? new Identifier(autoId.toString() + "_seeds") : cropItem.getLeft(),
 						cropItem.getRight());
 				
 				item = parseFoodItem(jsonItem, autoId, foodComponent);
-			} else if (block != null) item = parseItemBlock(jsonItem, autoId, block.getRight());
+			} else if (block != null) item = parseItemBlock(jsonItem, autoId, block.getRight(), ItemGroup.FOOD);
 			else item = parseFoodItem(jsonItem, autoId, foodComponent);
 			
 			doRegister(Registry.ITEM, item.getLeft(), item.getRight());
@@ -242,8 +242,8 @@ public final class FoodLoader {
 		return new Pair<>(props.id, item);
 	}
 
-	private Pair<Identifier, BlockItem> parseItemBlock(final JsonObject jsonItem, final Identifier autoId, final Block block) {
-		final CommonItemProperties props = parseCommonItemProperties(jsonItem, autoId, block == null ? ItemGroup.FOOD : ItemGroup.MISC);
+	private Pair<Identifier, BlockItem> parseItemBlock(final JsonObject jsonItem, final Identifier autoId, final Block block, ItemGroup defaultGroup) {
+		final CommonItemProperties props = parseCommonItemProperties(jsonItem, autoId, defaultGroup);
 
 		final BlockItem blockItem;
 		if (block instanceof ConsumableFoodBlock) blockItem = new ExtensibleFoodBlockItem((ConsumableFoodBlock) block, props.settings, props.name, props.description, props.glint);
