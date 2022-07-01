@@ -39,11 +39,23 @@ import net.minecraft.util.registry.Registry;
 
 public final class FoodLoader {
 
+	public static final int FORMAT_VERSION = 2;
 	private final CommandRegistryAccess commandRegistryAccess = new CommandRegistryAccess(DynamicRegistryManager.BUILTIN.get());
 
 	public FoodLoader() { }
 
 	public void applyFood(final JsonObject file, final Identifier autoId) throws JsonParseException {
+		{
+			int fileVersion = JsonHelper.getInt(file, "format_version", 1);
+			
+			if (fileVersion < FORMAT_VERSION) {
+				throw new JsonSyntaxException("This file use an older (version " + fileVersion + "), incompatible format. Current: "+ FORMAT_VERSION);
+			} else if (fileVersion > FORMAT_VERSION) {
+				throw new JsonSyntaxException("This file use a newer (version " + fileVersion + ") format that is not supported by this version of the mod. Please update the mod in order to load this file.");
+			}
+		}
+		
+		
 		final ExtendedFoodComponent foodComponent = parseFoodComponent(JsonHelper.getObject(file, "food"), autoId);
 
 		Pair<Identifier, Block> block;

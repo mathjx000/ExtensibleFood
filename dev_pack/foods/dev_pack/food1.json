@@ -1,4 +1,6 @@
 {
+	"format_version": 2,
+	
 	"food": {
 		"hunger": 2,
 		"saturation": 1,
