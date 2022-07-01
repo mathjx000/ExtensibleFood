@@ -12,6 +12,7 @@ import static net.minecraft.util.JsonHelper.getString;
 import static net.minecraft.util.JsonHelper.isNumber;
 
 import java.util.Locale;
+import java.util.Optional;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -51,9 +52,9 @@ public final class BlockParser {
 	@Deprecated
 	static IntProperty BRUH;
 
-	public static synchronized Pair<Identifier, Block> parseBlock(final JsonObject jsonBlock, Identifier blockId, final ExtendedFoodComponent foodComponent,
+	public static synchronized Pair<Optional<Identifier>, Block> parseBlock(final JsonObject jsonBlock, final ExtendedFoodComponent foodComponent,
 			final CommandRegistryAccess commandRegistryAccess) throws JsonSyntaxException {
-		if (jsonBlock.has("id")) blockId = new Identifier(JsonHelper.getString(jsonBlock, "id"));
+		Identifier blockId = jsonBlock.has("id") ? new Identifier(JsonHelper.getString(jsonBlock, "id")) : null;
 		
 		final BlockType type;
 		{
@@ -139,7 +140,7 @@ public final class BlockParser {
 
 		if (renderLayer != null) RenderLayerAccess.getBlocksMappedLayers().put(constructed, renderLayer);
 
-		return new Pair<>(blockId, constructed);
+		return new Pair<>(Optional.ofNullable(blockId), constructed);
 	}
 
 	private static ConsumableFoodBlock parseConsumableFoodBlock(final JsonObject jsonBlock,

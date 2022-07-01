@@ -3,6 +3,8 @@ package mathjx.extensiblefood.food;
 import static mathjx.extensiblefood.ExtensibleFood.IS_CLIENT;
 import static mathjx.extensiblefood.ExtensibleFood.LOGGER;
 
+import java.util.Optional;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -58,36 +60,36 @@ public final class FoodLoader {
 		
 		final ExtendedFoodComponent foodComponent = parseFoodComponent(JsonHelper.getObject(file, "food"), autoId);
 
-		Pair<Identifier, Block> block;
+		Pair<Optional<Identifier>, Block> block;
 		if (file.has("block")) {
 			final JsonObject jsonBlock = JsonHelper.getObject(file, "block");
-			block = BlockParser.parseBlock(jsonBlock, autoId, foodComponent, commandRegistryAccess);
+			block = BlockParser.parseBlock(jsonBlock, foodComponent, commandRegistryAccess);
 
 			if (jsonBlock.has("crop_item"))
 				throw new JsonSyntaxException("'crop_item' object was moved into the 'item' object as 'additional_crop_item' !");
 
-			doRegister(Registry.BLOCK, block.getLeft(), block.getRight());
+			doRegister(Registry.BLOCK, block.getLeft().orElse(autoId), block.getRight());
 		} else block = null;
 
 		if (file.has("item")) {
 			JsonObject jsonItem = JsonHelper.getObject(file, "item");
 			
-			Pair<Identifier, ? extends Item> item; 
+			Pair<Optional<Identifier>, ? extends Item> item; 
 			if (jsonItem.has("additional_crop_item")) {
 				if (block == null || !(block.getRight() instanceof CropFoodBlock)) throw new JsonSyntaxException("Object 'additional_crop_item' is invalid in this context.");
 				
 				final JsonObject jsonCropItem = JsonHelper.getObject(jsonItem, "additional_crop_item");
-				final Pair<Identifier, BlockItem> cropItem = parseItemBlock(jsonCropItem, autoId, block.getRight(), ItemGroup.MISC);
+				final Pair<Optional<Identifier>, BlockItem> cropItem = parseItemBlock(jsonCropItem, block.getRight(), ItemGroup.MISC);
 				// then parse the crop item as a item block
 				doRegister(Registry.ITEM,
-						cropItem.getLeft() == null ? new Identifier(autoId.toString() + "_seeds") : cropItem.getLeft(),
+						cropItem.getLeft().orElseGet(() -> new Identifier(autoId.toString() + "_seeds")),
 						cropItem.getRight());
 				
-				item = parseFoodItem(jsonItem, autoId, foodComponent);
-			} else if (block != null) item = parseItemBlock(jsonItem, autoId, block.getRight(), ItemGroup.FOOD);
-			else item = parseFoodItem(jsonItem, autoId, foodComponent);
+				item = parseFoodItem(jsonItem, foodComponent);
+			} else if (block != null) item = parseItemBlock(jsonItem, block.getRight(), ItemGroup.FOOD);
+			else item = parseFoodItem(jsonItem, foodComponent);
 			
-			doRegister(Registry.ITEM, item.getLeft(), item.getRight());
+			doRegister(Registry.ITEM, item.getLeft().orElse(autoId), item.getRight());
 		}
 	}
 
@@ -207,8 +209,8 @@ public final class FoodLoader {
 	//// FoodItem
 	//
 
-	private Pair<Identifier, Item> parseFoodItem(final JsonObject jsonItem, final Identifier autoId, final ExtendedFoodComponent foodComponent) throws JsonParseException {
-		final CommonItemProperties props =  parseCommonItemProperties(jsonItem, autoId, ItemGroup.FOOD);
+	private Pair<Optional<Identifier>, Item> parseFoodItem(final JsonObject jsonItem, final ExtendedFoodComponent foodComponent) throws JsonParseException {
+		final CommonItemProperties props =  parseCommonItemProperties(jsonItem, ItemGroup.FOOD);
 
 		final UseAction itemUseAction;
 		final Item itemConsumeRemainder;
@@ -242,8 +244,8 @@ public final class FoodLoader {
 		return new Pair<>(props.id, item);
 	}
 
-	private Pair<Identifier, BlockItem> parseItemBlock(final JsonObject jsonItem, final Identifier autoId, final Block block, ItemGroup defaultGroup) {
-		final CommonItemProperties props = parseCommonItemProperties(jsonItem, autoId, defaultGroup);
+	private Pair<Optional<Identifier>, BlockItem> parseItemBlock(final JsonObject jsonItem, final Block block, ItemGroup defaultGroup) {
+		final CommonItemProperties props = parseCommonItemProperties(jsonItem, defaultGroup);
 
 		final BlockItem blockItem;
 		if (block instanceof ConsumableFoodBlock) blockItem = new ExtensibleFoodBlockItem((ConsumableFoodBlock) block, props.settings, props.name, props.description, props.glint);
@@ -257,8 +259,8 @@ public final class FoodLoader {
 		return new Pair<>(props.id, blockItem);
 	}
 
-	private CommonItemProperties parseCommonItemProperties(final JsonObject jsonItem, Identifier itemId, ItemGroup defaultGroup) throws JsonParseException {
-		if (jsonItem.has("id")) itemId = new Identifier(JsonHelper.getString(jsonItem, "id"));
+	private CommonItemProperties parseCommonItemProperties(final JsonObject jsonItem, ItemGroup defaultGroup) throws JsonParseException {
+		Identifier itemId = jsonItem.has("id") ? new Identifier(JsonHelper.getString(jsonItem, "id")) : null;
 
 		final Item.Settings settings = new Item.Settings();
 		final Text name;
@@ -304,10 +306,10 @@ public final class FoodLoader {
 
 		composterValue = jsonItem.has("composter") ? JsonHelper.getFloat(jsonItem, "composter") : null;
 
-		return new CommonItemProperties(itemId, settings, name, description, glint, composterValue);
+		return new CommonItemProperties(Optional.ofNullable(itemId), settings, name, description, glint, composterValue);
 	}
 
-	private record CommonItemProperties(Identifier id, Item.Settings settings, Text name, Text description, boolean glint, Float composterValue) {
+	private record CommonItemProperties(Optional<Identifier> id, Item.Settings settings, Text name, Text description, boolean glint, Float composterValue) {
 		
 		/** register to composter map if required */
 		void registerComposterValue(Item blockItem) {
