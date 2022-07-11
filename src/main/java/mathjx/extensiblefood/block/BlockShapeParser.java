@@ -55,6 +55,7 @@ public final class BlockShapeParser {
 
 	public static VoxelShape[] parseShapes(final JsonObject jsonShapes,
 			final int expectedShapeCount) throws JsonSyntaxException {
+		// TODO change the name 'base' to 'do_slice' and put 'direction' into 'do_slice' object ?
 		if (jsonShapes.has("base")) {
 			final VoxelShape base = parseStateShape(jsonShapes.get("base"), "base");
 			final Direction dir = JsonUtils.getDirection(jsonShapes, "direction");
@@ -66,6 +67,7 @@ public final class BlockShapeParser {
 		final VoxelShape defaultShape = jsonShapes.has("default")
 				? BlockShapeParser.parseStateShape(getObject(jsonShapes, "default"), "default") : VoxelShapes.empty();
 
+		// TODO add support of intervals [0, 5) ?
 		for (int i = 0; i < expectedShapeCount; i++) {
 			final String blockStateName = Integer.toString(i);
 			if (jsonShapes.has(blockStateName)) {
