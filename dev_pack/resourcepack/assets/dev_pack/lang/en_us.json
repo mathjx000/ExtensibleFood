@@ -1,5 +1,6 @@
 {
 	"item.dev_pack.food2": "%s can open his inventory using [%s] key",
 	"item.dev_pack.food3.seeds": "Food3 Seeds",
-	"item.dev_pack.food3.fruit": "Lorem Ipsum"
+	"item.dev_pack.food3.fruit": "Lorem Ipsum",
+	"item.dev_pack.food4": "Food4"
 }

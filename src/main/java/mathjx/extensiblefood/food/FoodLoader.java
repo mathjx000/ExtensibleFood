@@ -79,15 +79,19 @@ public final class FoodLoader {
 				if (block == null || !(block.getRight() instanceof CropFoodBlock)) throw new JsonSyntaxException("Object 'additional_crop_item' is invalid in this context.");
 				
 				final JsonObject jsonCropItem = JsonHelper.getObject(jsonItem, "additional_crop_item");
-				final Pair<Optional<Identifier>, BlockItem> cropItem = parseItemBlock(jsonCropItem, block.getRight(), ItemGroup.MISC);
+				final Pair<Optional<Identifier>, BlockItem> cropItem = parseItemBlock(jsonCropItem, block.getRight(), ItemGroup.MISC, null);
 				// then parse the crop item as a item block
 				doRegister(Registry.ITEM,
 						cropItem.getLeft().orElseGet(() -> new Identifier(autoId.toString() + "_seeds")),
 						cropItem.getRight());
 				
 				item = parseFoodItem(jsonItem, foodComponent);
-			} else if (block != null) item = parseItemBlock(jsonItem, block.getRight(), ItemGroup.FOOD);
-			else item = parseFoodItem(jsonItem, foodComponent);
+			} else if (block != null) {
+				// no seeds are defined so either the block is a consumable block or a a comestible crop like potato
+				item = parseItemBlock(jsonItem, block.getRight(), ItemGroup.FOOD, foodComponent);
+			} else {
+				item = parseFoodItem(jsonItem, foodComponent);
+			}
 			
 			doRegister(Registry.ITEM, item.getLeft().orElse(autoId), item.getRight());
 		}
@@ -211,52 +215,61 @@ public final class FoodLoader {
 
 	private Pair<Optional<Identifier>, Item> parseFoodItem(final JsonObject jsonItem, final ExtendedFoodComponent foodComponent) throws JsonParseException {
 		final CommonItemProperties props =  parseCommonItemProperties(jsonItem, ItemGroup.FOOD);
-
-		final UseAction itemUseAction;
-		final Item itemConsumeRemainder;
-		final Identifier itemModelPredicate;
-
-		itemUseAction = jsonItem.has("action") ? parseAction(jsonItem, "action") : UseAction.EAT; // action
-
-		// remainder item after eaten
-		// TODO item specific data support
-		if (jsonItem.has("consume_remainder")) {
-			itemConsumeRemainder = JsonHelper.getItem(jsonItem, "consume_remainder");
-		} else itemConsumeRemainder = null;
-
-		if (IS_CLIENT && jsonItem.has("item_model_predicate")) {
-			// This is a client only property
-			itemModelPredicate = new Identifier(JsonHelper.getString(jsonItem, "item_model_predicate"));
-		} else itemModelPredicate = null;
+		final CommonFoodItemProperties foodProps = parseCommonFoodItemProperties(jsonItem);
 
 		props.settings.food(foodComponent.food);
 
 		// Build the item
-		final Item item = new ExtensibleFoodItem(props.settings, props.name, props.description, itemUseAction, props.glint, itemConsumeRemainder, foodComponent);
+		final Item item = new ExtensibleFoodItem(props.settings, props.name, props.description, foodProps.itemUseAction, props.glint, foodProps.itemConsumeRemainder, foodComponent);
 
 		props.registerComposterValue(item);
-		
-		// register the model predicate provider if specified
-		if (itemModelPredicate != null) {
-			ModelPredicateProviderRegistry.register(item, itemModelPredicate, FoodConsumptionProgressModelPredicate.INSTANCE);
-		}
+		foodProps.applyItemModelPredicateProvider(item);
 
 		return new Pair<>(props.id, item);
 	}
 
-	private Pair<Optional<Identifier>, BlockItem> parseItemBlock(final JsonObject jsonItem, final Block block, ItemGroup defaultGroup) {
+	private Pair<Optional<Identifier>, BlockItem> parseItemBlock(final JsonObject jsonItem, final Block block, ItemGroup defaultGroup, ExtendedFoodComponent foodComponent) {
 		final CommonItemProperties props = parseCommonItemProperties(jsonItem, defaultGroup);
 
 		final BlockItem blockItem;
-		if (block instanceof ConsumableFoodBlock) blockItem = new ExtensibleFoodBlockItem((ConsumableFoodBlock) block, props.settings, props.name, props.description, props.glint);
-		else if (block instanceof CropFoodBlock) {
-			blockItem = new ExtensibleFoodCropItem(block, props. settings, props.name, props.description, props.glint, null, null, null);
+		if (block instanceof ConsumableFoodBlock) {
+			blockItem = new ExtensibleFoodBlockItem((ConsumableFoodBlock) block, props.settings, props.name, props.description, props.glint);
+		} else if (block instanceof CropFoodBlock) {
+			if (foodComponent == null) {
+				blockItem = new ExtensibleFoodCropItem(block, props.settings, props.name, props.description, props.glint, null, null, null);
+			} else {
+				CommonFoodItemProperties foodProps = parseCommonFoodItemProperties(jsonItem);
+				props.settings.food(foodComponent.food);
+				blockItem = new ExtensibleFoodCropItem(block, props.settings, props.name, props.description, props.glint, foodProps.itemUseAction, foodProps.itemConsumeRemainder, foodComponent);
+				foodProps.applyItemModelPredicateProvider(blockItem);
+			}
 			((CropFoodBlock) block).seedItem = blockItem;
 		} else throw new RuntimeException();
 
 		props.registerComposterValue(blockItem);
 
 		return new Pair<>(props.id, blockItem);
+	}
+
+	private CommonFoodItemProperties parseCommonFoodItemProperties(JsonObject jsonItem) {
+		final UseAction itemUseAction;
+		final Item itemConsumeRemainder;
+		final Identifier itemModelPredicate;
+		
+		itemUseAction = jsonItem.has("action") ? parseAction(jsonItem, "action") : UseAction.EAT; // action
+		
+		// remainder item after eaten
+		// TODO item specific data support
+		if (jsonItem.has("consume_remainder")) {
+			itemConsumeRemainder = JsonHelper.getItem(jsonItem, "consume_remainder");
+		} else itemConsumeRemainder = null;
+		
+		if (IS_CLIENT && jsonItem.has("item_model_predicate")) {
+			// This is a client only property
+			itemModelPredicate = new Identifier(JsonHelper.getString(jsonItem, "item_model_predicate"));
+		} else itemModelPredicate = null;
+		
+		return new CommonFoodItemProperties(itemUseAction, itemConsumeRemainder, itemModelPredicate);
 	}
 
 	private CommonItemProperties parseCommonItemProperties(final JsonObject jsonItem, ItemGroup defaultGroup) throws JsonParseException {
@@ -316,6 +329,15 @@ public final class FoodLoader {
 			if (composterValue != null) ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.put(blockItem, composterValue);
 		}
 		
+	}
+	
+	private record CommonFoodItemProperties(UseAction itemUseAction, Item itemConsumeRemainder, Identifier itemModelPredicate) {
+		void applyItemModelPredicateProvider(Item item) {
+			// register the model predicate provider if specified
+			if (itemModelPredicate != null) {
+				ModelPredicateProviderRegistry.register(item, itemModelPredicate, FoodConsumptionProgressModelPredicate.INSTANCE);
+			}
+		}
 	}
 
 	/**

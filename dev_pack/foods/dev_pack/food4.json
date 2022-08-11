@@ -1,0 +1,28 @@
+{
+	"format_version": 2,
+	
+	"food": {
+		"base": "minecraft:sweet_berries"
+	},
+	
+	"item": {
+		"name": { "translate": "item.dev_pack.food4" }
+	},
+	
+	"block": {
+		"type": "crop",
+		"strength": {
+			"hardness": 0,
+			"resistance": 0
+		},
+		"shapes": {
+			"default": {
+				"from": [ 0, 0, 0 ],
+				"to": [ 16, 16, 16 ]
+			}
+		},
+		
+		"max_age": 3,
+		"fertilizable": true
+	}
+}
