@@ -12,7 +12,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SideShapeType;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockPredicateArgumentType;
 import net.minecraft.util.InvalidIdentifierException;
 import net.minecraft.util.JsonHelper;
@@ -44,7 +43,7 @@ public abstract class BlockStayCondition {
 	private static final Map<String, ConditionDeserializer> DESERIALIZERS = new HashMap<>();
 
 	static {
-		DESERIALIZERS.put("block_predicate", (json, commandRegistryAccess) -> {
+		DESERIALIZERS.put("block_predicate", json -> {
 			final JsonArray offsetArray = JsonHelper.getArray(json, "offset");
 			if (offsetArray.size() != 3) throw new JsonParseException("invalid offset array: length must be equals to 3");
 
@@ -56,9 +55,9 @@ public abstract class BlockStayCondition {
 
 			final String predicateStr = JsonHelper.getString(json, "predicate");
 
-			return new BlockPredicateCondition(offset, BlockPredicateArgumentType.blockPredicate(commandRegistryAccess).parse(new StringReader(predicateStr)));
+			return new BlockPredicateCondition(offset, BlockPredicateArgumentType.blockPredicate().parse(new StringReader(predicateStr)));
 		});
-		DESERIALIZERS.put("is_side_solid", (json, commandRegistryAccess) -> {
+		DESERIALIZERS.put("is_side_solid", json -> {
 			final String sideName = JsonHelper.getString(json, "side", Direction.DOWN.getName());
 			final Direction side = Direction.byName(sideName);
 			if (side == null) throw new JsonSyntaxException("Unexpected side: " + sideName);
@@ -74,7 +73,7 @@ public abstract class BlockStayCondition {
 
 			return new IsBlockSideSolidCondition(side, sideShapeType);
 		});
-		DESERIALIZERS.put("compound", (json, commandRegistryAccess) -> {
+		DESERIALIZERS.put("compound", json -> {
 			String type = JsonHelper.getString(json, "type", "or").toLowerCase();
 			
 			JsonArray jsonComponents = JsonHelper.getArray(json, "components");
@@ -82,7 +81,7 @@ public abstract class BlockStayCondition {
 			BlockStayCondition[] conditions = new BlockStayCondition[jsonComponents.size()];
 			
 			for (int i = 0; i < conditions.length; i++) {
-				conditions[i] =  parseCondition(JsonHelper.asObject(jsonComponents.get(i), "components[" + Integer.toString(i) + ']'), commandRegistryAccess);
+				conditions[i] =  parseCondition(JsonHelper.asObject(jsonComponents.get(i), "components[" + Integer.toString(i) + ']'));
 			}
 			
 			return switch (type) {
@@ -106,8 +105,7 @@ public abstract class BlockStayCondition {
 	 *
 	 * @throws JsonParseException if any syntax errors occurs
 	 */
-	public static BlockStayCondition parseCondition(final JsonObject jsonCondition,
-			final CommandRegistryAccess commandRegistryAccess) throws JsonParseException {
+	public static BlockStayCondition parseCondition(final JsonObject jsonCondition) throws JsonParseException {
 		final String conditionName = JsonHelper.getString(jsonCondition, "condition");
 		final ConditionDeserializer deserializer = DESERIALIZERS.get(conditionName);
 
@@ -115,7 +113,7 @@ public abstract class BlockStayCondition {
 			throw new JsonParseException("Unknown condition '" + conditionName + "'");
 		} else {
 			try {
-				return deserializer.deserialize(jsonCondition, commandRegistryAccess);
+				return deserializer.deserialize(jsonCondition);
 			} catch (final CommandSyntaxException e) {
 				throw new JsonSyntaxException(e);
 			}
@@ -174,8 +172,7 @@ public abstract class BlockStayCondition {
 	@FunctionalInterface
 	interface ConditionDeserializer {
 
-		BlockStayCondition deserialize(JsonObject json,
-				CommandRegistryAccess access) throws JsonParseException, InvalidIdentifierException, CommandSyntaxException;
+		BlockStayCondition deserialize(JsonObject json) throws JsonParseException, InvalidIdentifierException, CommandSyntaxException;
 
 	}
 

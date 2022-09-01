@@ -9,14 +9,15 @@ import mathjx.extensiblefood.ModConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ScreenTexts;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.Matrix4f;
 
 public final class ErrorScreenGadget extends Screen {
@@ -34,12 +35,12 @@ public final class ErrorScreenGadget extends Screen {
 	private final OrderedText textMore;
 
 	public ErrorScreenGadget(final Screen parent) {
-		super(Text.translatable("extensible_food.errorScreen.title"));
+		super(new TranslatableText("extensible_food.errorScreen.title"));
 
 		this.parent = parent;
 
 		if (entries.size() > maxLines) {
-			textMore = Text.translatable("extensible_food.errorScreen.error.hidden", entries.size() - maxLines).asOrderedText();
+			textMore = new TranslatableText("extensible_food.errorScreen.error.hidden", entries.size() - maxLines).asOrderedText();
 		} else textMore = null;
 	}
 
@@ -101,10 +102,10 @@ public final class ErrorScreenGadget extends Screen {
 		private final OrderedText generatedFileLocation;
 
 		ReportEntry(Path file, final Object[] args) {
-			generatedMessage = Text.translatable("extensible_food.errorScreen.error.message", args);
+			generatedMessage = new TranslatableText("extensible_food.errorScreen.error.message", args);
 
 			file = ExtensibleFood.MOD_CONFIG_DIR.relativize(file);
-			generatedFileLocation = Text.translatable("extensible_food.errorScreen.error.location", file.toString().replace(file.getFileSystem().getSeparator(), "/")).setStyle(Style.EMPTY.withItalic(true)).asOrderedText();
+			generatedFileLocation = new TranslatableText("extensible_food.errorScreen.error.location", file.toString().replace(file.getFileSystem().getSeparator(), "/")).setStyle(Style.EMPTY.withItalic(true)).asOrderedText();
 		}
 
 		private float render(final Matrix4f matrix4f, final VertexConsumerProvider vertexConsumers, final float x,

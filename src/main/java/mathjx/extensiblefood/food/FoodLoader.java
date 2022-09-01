@@ -21,7 +21,6 @@ import mathjx.extensiblefood.util.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.ComposterBlock;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.BlockItem;
@@ -36,13 +35,11 @@ import net.minecraft.util.JsonHelper;
 import net.minecraft.util.Pair;
 import net.minecraft.util.Rarity;
 import net.minecraft.util.UseAction;
-import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.Registry;
 
 public final class FoodLoader {
 
 	public static final int FORMAT_VERSION = 2;
-	private final CommandRegistryAccess commandRegistryAccess = new CommandRegistryAccess(DynamicRegistryManager.BUILTIN.get());
 
 	public FoodLoader() { }
 
@@ -63,7 +60,7 @@ public final class FoodLoader {
 		Pair<Optional<Identifier>, Block> block;
 		if (file.has("block")) {
 			final JsonObject jsonBlock = JsonHelper.getObject(file, "block");
-			block = BlockParser.parseBlock(jsonBlock, foodComponent, commandRegistryAccess);
+			block = BlockParser.parseBlock(jsonBlock, foodComponent);
 
 			if (jsonBlock.has("crop_item"))
 				throw new JsonSyntaxException("'crop_item' object was moved into the 'item' object as 'additional_crop_item' !");
@@ -199,8 +196,7 @@ public final class FoodLoader {
 				JsonHelper.getBoolean(object, "show_icon", true),
 				object.has("hidden_effect")
 					? parseEffect(JsonHelper.getObject(object, "hidden_effect"))
-					: null,
-				effect.getFactorCalculationDataSupplier()		// TODO: custom calculation data ?
+					: null
 			);
 		// @formatter:on
 	}

@@ -1,7 +1,8 @@
 package mathjx.extensiblefood.block.particle;
 
+import java.util.Random;
+
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 
 public final class CompoundParticleEmission extends ParticleEmission {
