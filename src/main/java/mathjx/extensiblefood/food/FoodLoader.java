@@ -18,6 +18,8 @@ import mathjx.extensiblefood.item.ExtensibleFoodCropItem;
 import mathjx.extensiblefood.item.ExtensibleFoodItem;
 import mathjx.extensiblefood.item.FoodConsumptionProgressModelPredicate;
 import mathjx.extensiblefood.util.Utils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.block.Block;
 import net.minecraft.block.ComposterBlock;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
@@ -219,7 +221,7 @@ public final class FoodLoader {
 		final Item item = new ExtensibleFoodItem(props.settings, props.name, props.description, foodProps.itemUseAction, props.glint, foodProps.itemConsumeRemainder, foodComponent);
 
 		props.registerComposterValue(item);
-		foodProps.applyItemModelPredicateProvider(item);
+		if (IS_CLIENT) foodProps.applyItemModelPredicateProvider(item);
 
 		return new Pair<>(props.id, item);
 	}
@@ -237,7 +239,7 @@ public final class FoodLoader {
 				CommonFoodItemProperties foodProps = parseCommonFoodItemProperties(jsonItem);
 				props.settings.food(foodComponent.food);
 				blockItem = new ExtensibleFoodCropItem(block, props.settings, props.name, props.description, props.glint, foodProps.itemUseAction, foodProps.itemConsumeRemainder, foodComponent);
-				foodProps.applyItemModelPredicateProvider(blockItem);
+				if (IS_CLIENT) foodProps.applyItemModelPredicateProvider(blockItem);
 			}
 			((CropFoodBlock) block).seedItem = blockItem;
 		} else throw new RuntimeException();
@@ -328,6 +330,7 @@ public final class FoodLoader {
 	}
 	
 	private record CommonFoodItemProperties(UseAction itemUseAction, Item itemConsumeRemainder, Identifier itemModelPredicate) {
+		@Environment(EnvType.CLIENT)
 		void applyItemModelPredicateProvider(Item item) {
 			// register the model predicate provider if specified
 			if (itemModelPredicate != null) {
