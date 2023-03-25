@@ -326,7 +326,7 @@ public final class FoodLoader {
 		
 		/** register to composter map if required */
 		void registerComposterValue(Item blockItem) {
-			if (composterValue != null) ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.put(blockItem, composterValue);
+			if (composterValue != null) ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.put(blockItem, composterValue.floatValue());
 		}
 		
 	}
