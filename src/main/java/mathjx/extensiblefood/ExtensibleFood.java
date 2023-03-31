@@ -71,6 +71,7 @@ public final class ExtensibleFood implements ModInitializer {
 	 */
 	public static final Path COMMON_RESOURCEPACK_DIR = MOD_CONFIG_DIR.resolve("resourcepack").toAbsolutePath();
 
+	@Deprecated(forRemoval = true)
 	public static final Set<String> USER_NAMESPACES = new HashSet<>();
 
 	/**
