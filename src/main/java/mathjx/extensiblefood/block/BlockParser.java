@@ -25,18 +25,14 @@ import mathjx.extensiblefood.block.particle.ParticleEmission;
 import mathjx.extensiblefood.food.ExtendedFoodComponent;
 import mathjx.extensiblefood.food.FoodLoader;
 import mathjx.extensiblefood.mixin.RenderLayerAccess;
-import net.fabricmc.fabric.mixin.object.builder.AbstractBlockAccessor;
-import net.fabricmc.fabric.mixin.object.builder.AbstractBlockSettingsAccessor;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.MapColor;
-import net.minecraft.block.Material;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.DyeColor;
@@ -70,16 +66,18 @@ public final class BlockParser {
 			};
 		}
 
-		final Material material;
+		// parse block settings
+		final AbstractBlock.Settings settings;
 		{
 			final JsonElement e = jsonBlock.get("material");
-			if (e != null) material = parseMaterial(e);
-			else if (type == BlockType.CROP) material = Material.PLANT;
-			else throw new JsonSyntaxException("Missing " + "material" + ", expected to find a String or an Object");
+			if (e != null) {
+				settings = parseMaterial(e);
+			} else if (type == BlockType.CROP) {
+				settings = AbstractBlock.Settings.create().mapColor(MapColor.DARK_GREEN).noCollision().ticksRandomly()
+						.breakInstantly().pistonBehavior(PistonBehavior.DESTROY);
+			} else
+				throw new JsonSyntaxException("Missing " + "material" + ", expected to find a String or an Object");
 		}
-
-		// parse block settings
-		final AbstractBlock.Settings settings = AbstractBlock.Settings.create(material);
 
 		if (jsonBlock.has("sounds")) {
 			final JsonObject soundObj = getObject(jsonBlock, "sounds");
@@ -239,7 +237,11 @@ public final class BlockParser {
 		return value;
 	}
 
-	private static Material parseMaterial(final JsonElement jsonMaterial) throws JsonParseException {
+	private static AbstractBlock.Settings parseMaterial(final JsonElement jsonMaterial)
+			throws JsonParseException {
+		final AbstractBlock.Settings settings;
+		final boolean fullSpec;
+
 		final JsonObject object = asObject(jsonMaterial, "material");
 
 		if (object.has("copy_from_block")) {
@@ -249,46 +251,63 @@ public final class BlockParser {
 
 			if (block == null) throw new JsonParseException("No block found with the id: \"" + blockId + '"');
 
-			// Here we take advantage of mixin accessors provided by the Fabric API...
-			return ((AbstractBlockSettingsAccessor) ((AbstractBlockAccessor) block).getSettings()).getMaterial();
+			settings = AbstractBlock.Settings.copy(block);
+			fullSpec = false;
 		} else {
-			MapColor color;
-			{
-				String materialIdentifier = getString(object, "color");
-
-				final String dyePrefix = "dye//";
-				if (materialIdentifier.startsWith(dyePrefix)) {
-					materialIdentifier = materialIdentifier.substring(dyePrefix.length());
-
-					DyeColor dye;
-					if ((dye = DyeColor.byName(materialIdentifier, null)) == null) throw new JsonParseException("Invalid dye '"
-							+ materialIdentifier + '\'');
-
-					color = dye.getMapColor();
-				} else {
-					// StringUtils.parseColorHex(materialIdentifier);
-
-					throw new JsonSyntaxException("Material colors other than dye colors are not allowed.");
-				}
-			}
-
-			PistonBehavior pistonBehavior = PistonBehavior.NORMAL;
-			if (object.has("piston_behavior")) {
-				final String behavior = getString(object, "piston_behavior");
-
-				pistonBehavior = switch (behavior.toLowerCase(Locale.ROOT)) {
-					case "normal" -> PistonBehavior.NORMAL;
-					case "destroy" -> PistonBehavior.DESTROY;
-					case "block" -> PistonBehavior.BLOCK;
-					case "ignore" -> PistonBehavior.IGNORE;
-					case "push_only" -> PistonBehavior.PUSH_ONLY;
-
-					default -> throw new JsonParseException("Invalid piston_behavior: '" + pistonBehavior + "'");
-				};
-			}
-
-			return new Material(color, false, getBoolean(object, "solid", true), getBoolean(object, "blocks_movement", true), getBoolean(object, "block_light", false), getBoolean(object, "break_by_hand", true), getBoolean(object, "burnable", false), pistonBehavior);
+			settings = AbstractBlock.Settings.create();
+			fullSpec = true;
 		}
+
+		if (object.has("color") || fullSpec) {
+			String materialIdentifier = getString(object, "color");
+
+			final String dyePrefix = "dye//";
+			if (materialIdentifier.startsWith(dyePrefix)) {
+				materialIdentifier = materialIdentifier.substring(dyePrefix.length());
+
+				DyeColor dye;
+				if ((dye = DyeColor.byName(materialIdentifier, null)) == null) throw new JsonParseException("Invalid dye '"
+						+ materialIdentifier + '\'');
+
+				settings.mapColor(dye.getMapColor());
+			} else {
+				// StringUtils.parseColorHex(materialIdentifier);
+
+				throw new JsonSyntaxException("Material colors other than dye colors are not allowed.");
+			}
+		}
+
+		if (object.has("piston_behavior")) {
+			final String behavior = getString(object, "piston_behavior");
+
+			settings.pistonBehavior(switch (behavior.toLowerCase(Locale.ROOT)) {
+				case "normal" -> PistonBehavior.NORMAL;
+				case "destroy" -> PistonBehavior.DESTROY;
+				case "block" -> PistonBehavior.BLOCK;
+				case "ignore" -> PistonBehavior.IGNORE;
+				case "push_only" -> PistonBehavior.PUSH_ONLY;
+	
+				default -> throw new JsonParseException("Invalid piston_behavior: '" + behavior + "'");
+			});
+		}
+		
+
+		if (getBoolean(object, "solid", true))
+			settings.solid();
+
+		if (!getBoolean(object, "blocks_movement", true))
+			settings.noCollision();
+
+		if (!getBoolean(object, "block_light", false))
+			settings.nonOpaque();
+
+		if (!getBoolean(object, "break_by_hand", true))
+			settings.requiresTool();
+
+		if (getBoolean(object, "burnable", false))
+			settings.burnable();
+
+		return settings;
 	}
 
 	private enum BlockType {
