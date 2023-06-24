@@ -12,19 +12,20 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.CommandRegistryWrapper;
 import net.minecraft.command.argument.ItemStackArgument;
 import net.minecraft.item.Item;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryWrapper;
 
 public final class FoodStackArgumentType implements ArgumentType<ItemStackArgument> {
 
 	private static final Collection<String> EXAMPLES = Arrays.asList("potato", "minecraft:sweet_berries");
 
-	private final CommandRegistryWrapper<Item> registryWrapper;
+	private final RegistryWrapper<Item> registryWrapper;
 
 	public FoodStackArgumentType(final CommandRegistryAccess commandRegistryAccess) {
-		registryWrapper = commandRegistryAccess.createWrapper(Registry.ITEM_KEY);
+		registryWrapper = commandRegistryAccess.createWrapper(Registries.ITEM.getKey());
 	}
 
 	@Override

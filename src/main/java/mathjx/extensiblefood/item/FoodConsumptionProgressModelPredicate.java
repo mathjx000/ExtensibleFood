@@ -1,6 +1,6 @@
 package mathjx.extensiblefood.item;
 
-import net.minecraft.client.item.UnclampedModelPredicateProvider;
+import net.minecraft.client.item.ClampedModelPredicateProvider;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
@@ -15,7 +15,7 @@ import net.minecraft.util.Identifier;
  * This class act as a singleton since no specific data needs to be specified.
  * Only the {@link Identifier} key may change.
  */
-public final class FoodConsumptionProgressModelPredicate implements UnclampedModelPredicateProvider {
+public final class FoodConsumptionProgressModelPredicate implements ClampedModelPredicateProvider {
 
 	public static final FoodConsumptionProgressModelPredicate INSTANCE = new FoodConsumptionProgressModelPredicate();
 

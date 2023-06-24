@@ -18,7 +18,6 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Formatting;
 
 public final class FoodInfoCommand {
@@ -42,10 +41,10 @@ public final class FoodInfoCommand {
 
 			for (final Pair<StatusEffectInstance, Float> pair : component.getStatusEffects()) {
 				final StatusEffectInstance effect = pair.getFirst();
-				lines.add(Text.translatable("commands.extensible_food.foodinfo.entry_effect", new TranslatableTextContent(effect.getTranslationKey()), createNumberText(pair.getSecond()), createNumberText(effect.getDuration()), createNumberText(effect.getAmplifier()), createBooleanText(effect.shouldShowParticles()), createBooleanText(effect.shouldShowIcon())));
+				lines.add(Text.translatable("commands.extensible_food.foodinfo.entry_effect", Text.translatable(effect.getTranslationKey()), createNumberText(pair.getSecond()), createNumberText(effect.getDuration()), createNumberText(effect.getAmplifier()), createBooleanText(effect.shouldShowParticles()), createBooleanText(effect.shouldShowIcon())));
 			}
 
-			for (final Text line : lines) source.sendFeedback(line, false);
+			for (final Text line : lines) source.sendFeedback(() -> line, false);
 
 			return Command.SINGLE_SUCCESS;
 		})));

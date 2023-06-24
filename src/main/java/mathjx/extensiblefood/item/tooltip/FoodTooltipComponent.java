@@ -1,14 +1,10 @@
 package mathjx.extensiblefood.item.tooltip;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import mathjx.extensiblefood.ExtensibleFood;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.item.TooltipData;
-import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.util.Identifier;
 
@@ -36,28 +32,27 @@ public final class FoodTooltipComponent implements TooltipData, TooltipComponent
 	}
 
 	@Override
-	public void drawItems(final TextRenderer textRenderer, final int x, final int y, final MatrixStack matrices,
-			final ItemRenderer itemRenderer, final int z) {
+	public void drawItems(final TextRenderer textRenderer, final int x, final int y, final DrawContext context) {
 		// TODO: support of mixing with others components
 		// TODO: support of effect display
 
-		RenderSystem.setShaderTexture(0, ICONS);
+		// RenderSystem.setShaderTexture(0, ICONS);
 
 		int i, j;
 		// First draw the hunger background
-		for (i = 0, j = (food.getHunger() + 1) / 2; i < j; i++) DrawableHelper.drawTexture(matrices, x + i * FULL_UNIT_WIDTH, y, 0, 0, FULL_UNIT_WIDTH, FULL_UNIT_WIDTH, 32, 32);
+		for (i = 0, j = (food.getHunger() + 1) / 2; i < j; i++) context.drawTexture(ICONS, x + i * FULL_UNIT_WIDTH, y, 0, 0, FULL_UNIT_WIDTH, FULL_UNIT_WIDTH, 32, 32);
 
 		// Then draw the saturation background
 		final float saturationWidth = food.getHunger() * food.getSaturationModifier();
 		for (i = 0; i < saturationWidth; i++) {
 			int w = FULL_UNIT_WIDTH;
 			if (saturationWidth - i < 1f) w = Math.round(w * (saturationWidth - i));
-			DrawableHelper.drawTexture(matrices, x + i * FULL_UNIT_WIDTH, y, FULL_UNIT_WIDTH, 0, w, FULL_UNIT_WIDTH, 32, 32);
+			context.drawTexture(ICONS, x + i * FULL_UNIT_WIDTH, y, FULL_UNIT_WIDTH, 0, w, FULL_UNIT_WIDTH, 32, 32);
 		}
 
 		// Finally draw the hunger foreground
-		for (i = 0, j = food.getHunger() / 2; i < j; i++) DrawableHelper.drawTexture(matrices, x + i * FULL_UNIT_WIDTH, y, 0, FULL_UNIT_WIDTH, FULL_UNIT_WIDTH, FULL_UNIT_WIDTH, 32, 32);
-		if (food.getHunger() % 2 == 1) DrawableHelper.drawTexture(matrices, x + food.getHunger() / 2 * FULL_UNIT_WIDTH, y, FULL_UNIT_WIDTH, FULL_UNIT_WIDTH, FULL_UNIT_WIDTH, FULL_UNIT_WIDTH, 32, 32);
+		for (i = 0, j = food.getHunger() / 2; i < j; i++) context.drawTexture(ICONS, x + i * FULL_UNIT_WIDTH, y, 0, FULL_UNIT_WIDTH, FULL_UNIT_WIDTH, FULL_UNIT_WIDTH, 32, 32);
+		if (food.getHunger() % 2 == 1) context.drawTexture(ICONS, x + food.getHunger() / 2 * FULL_UNIT_WIDTH, y, FULL_UNIT_WIDTH, FULL_UNIT_WIDTH, FULL_UNIT_WIDTH, FULL_UNIT_WIDTH, 32, 32);
 	}
 
 }

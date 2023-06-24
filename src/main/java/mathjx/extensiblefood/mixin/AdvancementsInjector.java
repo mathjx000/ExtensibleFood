@@ -19,12 +19,12 @@ import com.google.gson.JsonObject;
 
 import mathjx.extensiblefood.ModConfig;
 import net.minecraft.item.Item;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.server.ServerAdvancementLoader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
 
 @Mixin(ServerAdvancementLoader.class)
 public final class AdvancementsInjector {
@@ -53,7 +53,7 @@ public final class AdvancementsInjector {
 
 				Identifier identifier;
 				String name;
-				for (final Entry<RegistryKey<Item>, Item> e : Registry.ITEM.getEntrySet()) {
+				for (final Entry<RegistryKey<Item>, Item> e : Registries.ITEM.getEntrySet()) {
 					if (!e.getValue().isFood()) continue;
 
 					identifier = e.getKey().getValue();

@@ -4,7 +4,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -40,7 +39,8 @@ public final class ThornsCollisionEffect extends CollisionEffect {
 				if (d1 < movementThreshold && d2 < movementThreshold) return;
 			}
 
-			entity.damage(DamageSource.CACTUS, damagesAmount);
+			// TODO: customizable damage source
+			entity.damage(world.getDamageSources().cactus(), damagesAmount);
 		}
 	}
 

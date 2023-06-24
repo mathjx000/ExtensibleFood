@@ -4,6 +4,7 @@ import static mathjx.extensiblefood.ExtensibleFood.IS_CLIENT;
 import static mathjx.extensiblefood.ExtensibleFood.LOGGER;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -28,6 +29,10 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemGroups;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -36,8 +41,6 @@ import net.minecraft.util.JsonHelper;
 import net.minecraft.util.Pair;
 import net.minecraft.util.Rarity;
 import net.minecraft.util.UseAction;
-import net.minecraft.util.registry.DynamicRegistryManager;
-import net.minecraft.util.registry.Registry;
 
 public final class FoodLoader {
 
@@ -68,7 +71,7 @@ public final class FoodLoader {
 			if (jsonBlock.has("crop_item"))
 				throw new JsonSyntaxException("'crop_item' object was moved into the 'item' object as 'additional_crop_item' !");
 
-			doRegister(Registry.BLOCK, block.getLeft().orElse(autoId), block.getRight());
+			doRegister(Registries.BLOCK, block.getLeft().orElse(autoId), block.getRight());
 		} else block = null;
 
 		if (file.has("item")) {
@@ -79,21 +82,21 @@ public final class FoodLoader {
 				if (block == null || !(block.getRight() instanceof CropFoodBlock)) throw new JsonSyntaxException("Object 'additional_crop_item' is invalid in this context.");
 				
 				final JsonObject jsonCropItem = JsonHelper.getObject(jsonItem, "additional_crop_item");
-				final Pair<Optional<Identifier>, BlockItem> cropItem = parseItemBlock(jsonCropItem, block.getRight(), ItemGroup.MISC, null);
+				final Pair<Optional<Identifier>, BlockItem> cropItem = parseItemBlock(jsonCropItem, block.getRight(), ItemGroups.NATURAL, null);
 				// then parse the crop item as a item block
-				doRegister(Registry.ITEM,
+				doRegister(Registries.ITEM,
 						cropItem.getLeft().orElseGet(() -> new Identifier(autoId.toString() + "_seeds")),
 						cropItem.getRight());
 				
 				item = parseFoodItem(jsonItem, foodComponent);
 			} else if (block != null) {
 				// no seeds are defined so either the block is a consumable block or a a comestible crop like potato
-				item = parseItemBlock(jsonItem, block.getRight(), ItemGroup.FOOD, foodComponent);
+				item = parseItemBlock(jsonItem, block.getRight(), ItemGroups.FOOD_AND_DRINK, foodComponent);
 			} else {
 				item = parseFoodItem(jsonItem, foodComponent);
 			}
 			
-			doRegister(Registry.ITEM, item.getLeft().orElse(autoId), item.getRight());
+			doRegister(Registries.ITEM, item.getLeft().orElse(autoId), item.getRight());
 		}
 	}
 
@@ -130,7 +133,7 @@ public final class FoodLoader {
 			final Item baseItem = JsonHelper.getItem(foodJson, "base");
 
 			if (!baseItem.isFood()) throw new JsonParseException("Invalid food base item '"
-					+ Registry.ITEM.getId(baseItem) + "', this item exists but it not a food");
+					+ Registries.ITEM.getId(baseItem) + "', this item exists but it not a food");
 
 			final FoodComponent base = baseItem.getFoodComponent();
 
@@ -187,7 +190,7 @@ public final class FoodLoader {
 	 */
 	private StatusEffectInstance parseEffect(final JsonObject object) {
 		final String id = JsonHelper.getString(object, "id");
-		final StatusEffect effect = Registry.STATUS_EFFECT.getOrEmpty(new Identifier(id)).orElseThrow(() -> new JsonParseException("Expected id to be an item, was unknown string '"
+		final StatusEffect effect = Registries.STATUS_EFFECT.getOrEmpty(new Identifier(id)).orElseThrow(() -> new JsonParseException("Expected id to be an item, was unknown string '"
 				+ id + '\''));
 
 		// @formatter:off
@@ -214,7 +217,7 @@ public final class FoodLoader {
 	//
 
 	private Pair<Optional<Identifier>, Item> parseFoodItem(final JsonObject jsonItem, final ExtendedFoodComponent foodComponent) throws JsonParseException {
-		final CommonItemProperties props =  parseCommonItemProperties(jsonItem, ItemGroup.FOOD);
+		final CommonItemProperties props =  parseCommonItemProperties(jsonItem, ItemGroups.FOOD_AND_DRINK);
 		final CommonFoodItemProperties foodProps = parseCommonFoodItemProperties(jsonItem);
 
 		props.settings.food(foodComponent.food);
@@ -285,20 +288,25 @@ public final class FoodLoader {
 		group: if (jsonItem.has("group")) {
 			final String groupName = JsonHelper.getString(jsonItem, "group");
 
-			for (final ItemGroup group : ItemGroup.GROUPS) {
-				if (group.getName().equalsIgnoreCase(groupName)) {
+			for (final ItemGroup group : ItemGroups.getGroups()) {
+				// TODO: better comparison method?
+				if (group.getDisplayName().getString().equalsIgnoreCase(groupName)) {
 					settings.group(group);
 					break group;
 				}
 			}
 
 			final StringBuilder builder = new StringBuilder();
-			builder.append("invalid item group '").append(groupName).append("\' valid values are : ( ");
-
-			final String s = " | ";
-			builder.append(ItemGroup.GROUPS[0].getName());
-			for (int i = 1; i < ItemGroup.GROUPS.length; i++) builder.append(s).append(ItemGroup.GROUPS[i].getName());
-			builder.append(" )");
+			builder
+				.append("invalid item group '")
+				.append(groupName)
+				.append("\' valid values are : ( ")
+				.append(ItemGroups.getGroups()
+						.stream()
+						.map(ItemGroup::getDisplayName)
+						.map(Text::getString)
+						.collect(Collectors.joining(" | ")))
+				.append(" )");
 
 			throw new JsonParseException(builder.toString());
 		} else settings.group(defaultGroup);
@@ -421,8 +429,8 @@ public final class FoodLoader {
 	public static SoundEvent parseSoundEvent(final String string) {
 		final Identifier soundId = new Identifier(string);
 
-		SoundEvent sound = Registry.SOUND_EVENT.get(soundId);
-		if (sound == null) sound = Registry.register(Registry.SOUND_EVENT, soundId, new SoundEvent(soundId));
+		SoundEvent sound = Registries.SOUND_EVENT.get(soundId);
+		if (sound == null) sound = Registry.register(Registries.SOUND_EVENT, soundId, new SoundEvent(soundId));
 
 		return sound;
 	}

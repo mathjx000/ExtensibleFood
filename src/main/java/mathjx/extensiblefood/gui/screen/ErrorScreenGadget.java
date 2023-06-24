@@ -8,16 +8,13 @@ import mathjx.extensiblefood.ExtensibleFood;
 import mathjx.extensiblefood.ModConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.Matrix4f;
 
 public final class ErrorScreenGadget extends Screen {
 
@@ -45,37 +42,32 @@ public final class ErrorScreenGadget extends Screen {
 
 	@Override
 	protected void init() {
-		this.addDrawableChild(new ButtonWidget(width / 2 - 100, height / 6 + 168, 200, 20, ScreenTexts.BACK, btn -> client.setScreen(parent)));
+		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.BACK, btn -> client.setScreen(parent)).dimensions(width / 2 - 100, height / 6 + 168, 200, 20).build());
 	}
 
 	@Override
-	public void render(final MatrixStack matrices, final int mouseX, final int mouseY, final float delta) {
-		this.renderBackground(matrices);
+	public void render(final DrawContext context, final int mouseX, final int mouseY, final float delta) {
+		this.renderBackground(context);
 
-		drawCenteredText(matrices, textRenderer, title, width / 2, 15, 0xFFFFFF);
+		context.drawCenteredTextWithShadow(textRenderer, title, width / 2, 15, 0xFFFFFF);
 
-		final float x = width / 2 - maxWidth / 2;
+		final int x = (int) (width / 2 - maxWidth / 2f);
 		float y = 45f;
 		final int max = Math.min(entries.size(), maxLines);
 		ReportEntry entry;
 
-		final Matrix4f matrix4f = matrices.peek().getPositionMatrix();
-		final VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-
 		for (int i = 0; i < max; i++) {
 			entry = entries.get(i);
 
-			y = entry.render(matrix4f, immediate, x, y, textRenderer);
+			y = entry.render(context, x, y, textRenderer);
 		}
 
 		if (textMore != null) {
 			y += textRenderer.fontHeight;
-			textRenderer.draw(textMore, x, y, 0xFFFFFF, true, matrix4f, immediate, false, 0x000000, 0xF000F0);
+			context.drawText(textRenderer, textMore, x, (int) y, 0xFFFFFF, true);
 		}
 
-		immediate.draw();
-
-		super.render(matrices, mouseX, mouseY, delta);
+		super.render(context, mouseX, mouseY, delta);
 	}
 
 	@Override
@@ -107,18 +99,17 @@ public final class ErrorScreenGadget extends Screen {
 			generatedFileLocation = Text.translatable("extensible_food.errorScreen.error.location", file.toString().replace(file.getFileSystem().getSeparator(), "/")).setStyle(Style.EMPTY.withItalic(true)).asOrderedText();
 		}
 
-		private float render(final Matrix4f matrix4f, final VertexConsumerProvider vertexConsumers, final float x,
-				float y, final TextRenderer textRenderer) {
+		private float render(final DrawContext context, final int x, float y, final TextRenderer textRenderer) {
 			y += 1f;
 
 			for (final OrderedText line : textRenderer.wrapLines(generatedMessage, maxWidth)) {
-				textRenderer.draw(line, x, y, 0xFF_A0_A0, false, matrix4f, vertexConsumers, false, 0x000000, 0xF000F0);
+				context.drawText(textRenderer, line, x, (int) y, 0xFF_A0_A0, false);
 				y += textRenderer.fontHeight;
 			}
 
 			y += 1f;
 
-			textRenderer.draw(generatedFileLocation, x, y, 0xA0A0A0, false, matrix4f, vertexConsumers, false, 0x000000, 0xF000F0);
+			context.drawText(textRenderer, generatedFileLocation, x, (int) y, 0xA0A0A0, false);
 			y += textRenderer.fontHeight;
 
 			return y + 1f;

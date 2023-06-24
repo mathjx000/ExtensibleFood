@@ -35,13 +35,14 @@ import net.minecraft.block.Material;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.Pair;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.util.shape.VoxelShape;
 
 public final class BlockParser {
@@ -78,7 +79,7 @@ public final class BlockParser {
 		}
 
 		// parse block settings
-		final AbstractBlock.Settings settings = AbstractBlock.Settings.of(material);
+		final AbstractBlock.Settings settings = AbstractBlock.Settings.create(material);
 
 		if (jsonBlock.has("sounds")) {
 			final JsonObject soundObj = getObject(jsonBlock, "sounds");
@@ -239,213 +240,54 @@ public final class BlockParser {
 	}
 
 	private static Material parseMaterial(final JsonElement jsonMaterial) throws JsonParseException {
-		if (jsonMaterial.isJsonPrimitive()) {
-			final String materialName = jsonMaterial.getAsString().toLowerCase(Locale.ROOT);
+		final JsonObject object = asObject(jsonMaterial, "material");
 
-			// TODO specify concerned file
-			LOGGER.warn("Using raw material names is deprecated and will be removed in the future.");
+		if (object.has("copy_from_block")) {
+			final Identifier blockId = new Identifier(JsonHelper.getString(object, "copy_from_block"));
 
-			/*
-			 * Don't say anything... Just cry.
-			 *
-			 * Due to its difficulty to maintain correct names this option is considered
-			 * deprecated and may be removed someday.
-			 */
-			switch (materialName) {
-				case "air":
-					return Material.AIR;
+			final Block block = Registries.BLOCK.get(blockId);
 
-				case "structure_void":
-					return Material.STRUCTURE_VOID;
+			if (block == null) throw new JsonParseException("No block found with the id: \"" + blockId + '"');
 
-				case "portal":
-					return Material.PORTAL;
-
-				case "carpet":
-					return Material.CARPET;
-
-				case "plant":
-					return Material.PLANT;
-
-				case "underwater_plant":
-					return Material.UNDERWATER_PLANT;
-
-				case "replaceable_plant":
-					return Material.REPLACEABLE_PLANT;
-
-				case "nether_shoots":
-					return Material.NETHER_SHOOTS;
-
-				case "replaceable_underwater_plant":
-					return Material.REPLACEABLE_UNDERWATER_PLANT;
-
-				case "water":
-					return Material.WATER;
-
-				case "bubble_column":
-					return Material.BUBBLE_COLUMN;
-
-				case "lava":
-					return Material.LAVA;
-
-				case "snow_layer":
-					return Material.SNOW_LAYER;
-
-				case "fire":
-					return Material.FIRE;
-
-				case "decoration":
-					return Material.DECORATION;
-
-				case "cobweb":
-					return Material.COBWEB;
-
-				case "skulk":
-					return Material.SCULK;
-
-				case "redstone_lamp":
-					return Material.REDSTONE_LAMP;
-
-				case "organic_product":
-					return Material.ORGANIC_PRODUCT;
-
-				case "soil":
-					return Material.SOIL;
-
-				case "solid_organic":
-					return Material.SOLID_ORGANIC;
-
-				case "dense_ice":
-					return Material.DENSE_ICE;
-
-				case "aggregate":
-					return Material.AGGREGATE;
-
-				case "sponge":
-					return Material.SPONGE;
-
-				case "shulker_box":
-					return Material.SHULKER_BOX;
-
-				case "wood":
-					return Material.WOOD;
-
-				case "nether_wood":
-					return Material.NETHER_WOOD;
-
-				case "bamboo_sapling":
-					return Material.BAMBOO_SAPLING;
-
-				case "bamboo":
-					return Material.BAMBOO;
-
-				case "wool":
-					return Material.WOOL;
-
-				case "tnt":
-					return Material.TNT;
-
-				case "leaves":
-					return Material.LEAVES;
-
-				case "glass":
-					return Material.GLASS;
-
-				case "ice":
-					return Material.ICE;
-
-				case "cactus":
-					return Material.CACTUS;
-
-				case "stone":
-					return Material.STONE;
-
-				case "metal":
-					return Material.METAL;
-
-				case "snow_block":
-					return Material.SNOW_BLOCK;
-
-				case "repair_station":
-					return Material.REPAIR_STATION;
-
-				case "barrier":
-					return Material.BARRIER;
-
-				case "piston":
-					return Material.PISTON;
-
-				case "moss_block":
-					return Material.MOSS_BLOCK;
-
-				case "ground":
-					return Material.GOURD;
-
-				case "egg":
-					return Material.EGG;
-
-				case "cake":
-					return Material.CAKE;
-
-				case "amethyst":
-					return Material.AMETHYST;
-
-				case "powder_snow":
-					return Material.POWDER_SNOW;
-
-				default:
-					throw new JsonParseException("Unknown material '" + materialName + '\'');
-			}
+			// Here we take advantage of mixin accessors provided by the Fabric API...
+			return ((AbstractBlockSettingsAccessor) ((AbstractBlockAccessor) block).getSettings()).getMaterial();
 		} else {
-			final JsonObject object = asObject(jsonMaterial, "material");
+			MapColor color;
+			{
+				String materialIdentifier = getString(object, "color");
 
-			if (object.has("copy_from_block")) {
-				final Identifier blockId = new Identifier(JsonHelper.getString(object, "copy_from_block"));
+				final String dyePrefix = "dye//";
+				if (materialIdentifier.startsWith(dyePrefix)) {
+					materialIdentifier = materialIdentifier.substring(dyePrefix.length());
 
-				final Block block = Registry.BLOCK.get(blockId);
+					DyeColor dye;
+					if ((dye = DyeColor.byName(materialIdentifier, null)) == null) throw new JsonParseException("Invalid dye '"
+							+ materialIdentifier + '\'');
 
-				if (block == null) throw new JsonParseException("No block found with the id: \"" + blockId + '"');
+					color = dye.getMapColor();
+				} else {
+					// StringUtils.parseColorHex(materialIdentifier);
 
-				// Here we take advantage of mixin accessors provided by the Fabric API...
-				return ((AbstractBlockSettingsAccessor) ((AbstractBlockAccessor) block).getSettings()).getMaterial();
-			} else {
-				MapColor color;
-				{
-					String materialIdentifier = getString(object, "color");
-
-					final String dyePrefix = "dye//";
-					if (materialIdentifier.startsWith(dyePrefix)) {
-						materialIdentifier = materialIdentifier.substring(dyePrefix.length());
-
-						DyeColor dye;
-						if ((dye = DyeColor.byName(materialIdentifier, null)) == null) throw new JsonParseException("Invalid dye '"
-								+ materialIdentifier + '\'');
-
-						color = dye.getMapColor();
-					} else {
-						// StringUtils.parseColorHex(materialIdentifier);
-
-						throw new JsonSyntaxException("Material colors other than dye colors are not allowed.");
-					}
+					throw new JsonSyntaxException("Material colors other than dye colors are not allowed.");
 				}
-
-				PistonBehavior pistonBehavior = PistonBehavior.NORMAL;
-				if (object.has("piston_behavior")) {
-					final String behavior = getString(object, "piston_behavior");
-
-					pistonBehavior = switch (behavior.toLowerCase(Locale.ROOT)) {
-						case "normal" -> PistonBehavior.NORMAL;
-						case "destroy" -> PistonBehavior.DESTROY;
-						case "block" -> PistonBehavior.BLOCK;
-						case "ignore" -> PistonBehavior.IGNORE;
-						case "push_only" -> PistonBehavior.PUSH_ONLY;
-
-						default -> throw new JsonParseException("Invalid piston_behavior: '" + pistonBehavior + "'");
-					};
-				}
-
-				return new Material(color, false, getBoolean(object, "solid", true), getBoolean(object, "blocks_movement", true), getBoolean(object, "block_light", false), getBoolean(object, "break_by_hand", true), getBoolean(object, "burnable", false), pistonBehavior);
 			}
+
+			PistonBehavior pistonBehavior = PistonBehavior.NORMAL;
+			if (object.has("piston_behavior")) {
+				final String behavior = getString(object, "piston_behavior");
+
+				pistonBehavior = switch (behavior.toLowerCase(Locale.ROOT)) {
+					case "normal" -> PistonBehavior.NORMAL;
+					case "destroy" -> PistonBehavior.DESTROY;
+					case "block" -> PistonBehavior.BLOCK;
+					case "ignore" -> PistonBehavior.IGNORE;
+					case "push_only" -> PistonBehavior.PUSH_ONLY;
+
+					default -> throw new JsonParseException("Invalid piston_behavior: '" + pistonBehavior + "'");
+				};
+			}
+
+			return new Material(color, false, getBoolean(object, "solid", true), getBoolean(object, "blocks_movement", true), getBoolean(object, "block_light", false), getBoolean(object, "break_by_hand", true), getBoolean(object, "burnable", false), pistonBehavior);
 		}
 	}
 

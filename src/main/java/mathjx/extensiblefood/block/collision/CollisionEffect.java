@@ -14,10 +14,11 @@ import mathjx.extensiblefood.util.JsonUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
 public abstract class CollisionEffect {
@@ -80,7 +81,7 @@ public abstract class CollisionEffect {
 
 	private static EntityType<?> parseEntityType(final JsonElement jsonEntity,
 			final String name) throws JsonSyntaxException {
-		return Registry.ENTITY_TYPE.getOrEmpty(new Identifier(asString(jsonEntity, name))).orElseThrow(() -> new JsonSyntaxException("Unexpected "
+		return Registries.ENTITY_TYPE.getOrEmpty(new Identifier(asString(jsonEntity, name))).orElseThrow(() -> new JsonSyntaxException("Unexpected "
 				+ name + ", expected to be an entity id"));
 	}
 
