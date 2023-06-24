@@ -46,7 +46,7 @@ public final class BlockParser {
 	/**
 	 * Dirty workaround for dynamic block state properties creation
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = false)
 	static IntProperty BRUH;
 
 	public static synchronized Pair<Optional<Identifier>, Block> parseBlock(final JsonObject jsonBlock, final ExtendedFoodComponent foodComponent,
@@ -102,8 +102,11 @@ public final class BlockParser {
 				? BlockStayCondition.parseCondition(JsonHelper.getObject(jsonBlock, "placement_condition"), commandRegistryAccess)
 						: null;
 
-		final ParticleEmission particleEmission = jsonBlock.has("particles")
-				? ParticleEmission.parseParticleEmission(jsonBlock.get("particles")) : null;
+		final ParticleEmission particleEmission = jsonBlock.has("particles") ?
+				ParticleEmission.parseParticleEmission(
+						jsonBlock.get("particles"),
+						commandRegistryAccess.createWrapper(Registries.PARTICLE_TYPE.getKey())) :
+						null;
 
 		final CollisionEffect collisionEffect = jsonBlock.has("collision_effects")
 				? CollisionEffect.parseCollisionEffect(jsonBlock.get("collision_effects")) : null;

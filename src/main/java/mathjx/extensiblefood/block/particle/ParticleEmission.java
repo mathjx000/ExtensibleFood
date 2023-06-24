@@ -18,6 +18,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.command.argument.ParticleEffectArgumentType;
 import net.minecraft.particle.ParticleEffect;
+import net.minecraft.particle.ParticleType;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -30,12 +32,15 @@ public abstract class ParticleEmission {
 
 	public abstract void spawn(World world, BlockPos pos, Random random);
 
-	public static ParticleEmission parseParticleEmission(final JsonElement jsonParticles) throws JsonSyntaxException {
+	public static ParticleEmission parseParticleEmission(final JsonElement jsonParticles, final RegistryWrapper<ParticleType<?>> registry) throws JsonSyntaxException {
+		if (true) // FIXME
+			throw new UnsupportedOperationException("particles are not supported yet due to changes in game code");
+		
 		if (jsonParticles.isJsonArray()) {
 			final JsonArray array = jsonParticles.getAsJsonArray();
 			final ParticleEmission[] emissions = new ParticleEmission[array.size()];
 
-			for (int i = 0; i < emissions.length; i++) emissions[i] = parseParticleEmission(array.get(i));
+			for (int i = 0; i < emissions.length; i++) emissions[i] = parseParticleEmission(array.get(i), registry);
 
 			return new CompoundParticleEmission(emissions);
 		}
@@ -62,7 +67,7 @@ public abstract class ParticleEmission {
 
 		ParticleEffect particleEffect;
 		try {
-			particleEffect = ParticleEffectArgumentType.readParameters(new StringReader(getString(jsonParticle, "particle")));
+			particleEffect = ParticleEffectArgumentType.readParameters(new StringReader(getString(jsonParticle, "particle")), registry);
 		} catch (final CommandSyntaxException e) {
 			throw new JsonSyntaxException(e.getMessage(), e);
 		}

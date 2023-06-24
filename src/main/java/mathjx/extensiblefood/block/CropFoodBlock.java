@@ -103,9 +103,9 @@ public final class CropFoodBlock extends CropBlock {
 	protected void appendProperties(final Builder<Block, BlockState> builder) {
 		builder.add(BlockParser.BRUH);
 	}
-
+	
 	@Override
-	public boolean isFertilizable(final BlockView world, final BlockPos pos, final BlockState state,
+	public boolean isFertilizable(final WorldView world, final BlockPos pos, final BlockState state,
 			final boolean isClient) {
 		return fertilizable && super.isFertilizable(world, pos, state, isClient);
 	}

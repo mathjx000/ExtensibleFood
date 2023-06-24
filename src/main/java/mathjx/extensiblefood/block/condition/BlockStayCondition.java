@@ -45,6 +45,9 @@ public abstract class BlockStayCondition {
 
 	static {
 		DESERIALIZERS.put("block_predicate", (json, commandRegistryAccess) -> {
+			if (true) // FIXME
+				throw new UnsupportedOperationException("block_predicate is not supported yet due to changes in game code");
+			
 			final JsonArray offsetArray = JsonHelper.getArray(json, "offset");
 			if (offsetArray.size() != 3) throw new JsonParseException("invalid offset array: length must be equals to 3");
 

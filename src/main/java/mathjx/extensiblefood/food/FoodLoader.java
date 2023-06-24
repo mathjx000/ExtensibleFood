@@ -23,7 +23,6 @@ import mathjx.extensiblefood.util.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.ComposterBlock;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.BlockItem;
@@ -31,7 +30,6 @@ import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
-import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -49,7 +47,7 @@ public final class FoodLoader {
 
 	public static final int FORMAT_VERSION = 2;
 	
-	private final CommandRegistryAccess commandRegistryAccess = new CommandRegistryAccess(DynamicRegistryManager.BUILTIN.get());
+	/* private final CommandRegistryAccess commandRegistryAccess = new CommandRegistryAccess(DynamicRegistryManager.BUILTIN.get()); */
 	private final ItemGroupApplier groupApplier;
 
 	public FoodLoader(ItemGroupApplier groupApplier) {
@@ -73,7 +71,7 @@ public final class FoodLoader {
 		Pair<Optional<Identifier>, Block> block;
 		if (file.has("block")) {
 			final JsonObject jsonBlock = JsonHelper.getObject(file, "block");
-			block = BlockParser.parseBlock(jsonBlock, foodComponent, commandRegistryAccess);
+			block = BlockParser.parseBlock(jsonBlock, foodComponent, /*commandRegistryAccess*/ null); // FIXME
 
 			if (jsonBlock.has("crop_item"))
 				throw new JsonSyntaxException("'crop_item' object was moved into the 'item' object as 'additional_crop_item' !");
