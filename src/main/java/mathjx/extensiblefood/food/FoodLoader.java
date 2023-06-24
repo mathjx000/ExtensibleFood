@@ -18,6 +18,7 @@ import mathjx.extensiblefood.item.ExtensibleFoodBlockItem;
 import mathjx.extensiblefood.item.ExtensibleFoodCropItem;
 import mathjx.extensiblefood.item.ExtensibleFoodItem;
 import mathjx.extensiblefood.item.FoodConsumptionProgressModelPredicate;
+import mathjx.extensiblefood.item.ItemGroupApplier;
 import mathjx.extensiblefood.util.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.ComposterBlock;
@@ -33,10 +34,12 @@ import net.minecraft.item.ItemGroups;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.InvalidIdentifierException;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.Pair;
 import net.minecraft.util.Rarity;
@@ -45,9 +48,13 @@ import net.minecraft.util.UseAction;
 public final class FoodLoader {
 
 	public static final int FORMAT_VERSION = 2;
+	
 	private final CommandRegistryAccess commandRegistryAccess = new CommandRegistryAccess(DynamicRegistryManager.BUILTIN.get());
+	private final ItemGroupApplier groupApplier;
 
-	public FoodLoader() { }
+	public FoodLoader(ItemGroupApplier groupApplier) {
+		this.groupApplier = groupApplier;
+	}
 
 	public void applyFood(final JsonObject file, final Identifier autoId) throws JsonParseException {
 		{
@@ -77,15 +84,17 @@ public final class FoodLoader {
 		if (file.has("item")) {
 			JsonObject jsonItem = JsonHelper.getObject(file, "item");
 			
-			Pair<Optional<Identifier>, ? extends Item> item; 
+			Pair<Identifier, ? extends Item> item; 
 			if (jsonItem.has("additional_crop_item")) {
 				if (block == null || !(block.getRight() instanceof CropFoodBlock)) throw new JsonSyntaxException("Object 'additional_crop_item' is invalid in this context.");
 				
 				final JsonObject jsonCropItem = JsonHelper.getObject(jsonItem, "additional_crop_item");
-				final Pair<Optional<Identifier>, BlockItem> cropItem = parseItemBlock(jsonCropItem, block.getRight(), ItemGroups.NATURAL, null);
+				final Pair<Identifier, BlockItem> cropItem = parseItemBlock(jsonCropItem, block.getRight(), ItemGroups.NATURAL, null);
 				// then parse the crop item as a item block
 				doRegister(Registries.ITEM,
-						cropItem.getLeft().orElseGet(() -> new Identifier(autoId.toString() + "_seeds")),
+						cropItem.getLeft() == null ?
+								new Identifier(autoId.toString() + "_seeds") :
+								cropItem.getLeft(),
 						cropItem.getRight());
 				
 				item = parseFoodItem(jsonItem, foodComponent);
@@ -96,7 +105,7 @@ public final class FoodLoader {
 				item = parseFoodItem(jsonItem, foodComponent);
 			}
 			
-			doRegister(Registries.ITEM, item.getLeft().orElse(autoId), item.getRight());
+			doRegister(Registries.ITEM, item.getLeft() == null ? autoId : item.getLeft(), item.getRight());
 		}
 	}
 
@@ -216,8 +225,8 @@ public final class FoodLoader {
 	//// FoodItem
 	//
 
-	private Pair<Optional<Identifier>, Item> parseFoodItem(final JsonObject jsonItem, final ExtendedFoodComponent foodComponent) throws JsonParseException {
-		final CommonItemProperties props =  parseCommonItemProperties(jsonItem, ItemGroups.FOOD_AND_DRINK);
+	private Pair<Identifier, Item> parseFoodItem(final JsonObject jsonItem, final ExtendedFoodComponent foodComponent) throws JsonParseException {
+		final CommonItemProperties props =  parseCommonItemProperties(jsonItem);
 		final CommonFoodItemProperties foodProps = parseCommonFoodItemProperties(jsonItem);
 
 		props.settings.food(foodComponent.food);
@@ -227,12 +236,15 @@ public final class FoodLoader {
 
 		props.registerComposterValue(item);
 		foodProps.applyItemModelPredicateProvider(item);
+		groupApplier.addToExisting(item, props.itemGroup == null ?
+				ItemGroups.FOOD_AND_DRINK :
+				props.itemGroup);
 
 		return new Pair<>(props.id, item);
 	}
 
-	private Pair<Optional<Identifier>, BlockItem> parseItemBlock(final JsonObject jsonItem, final Block block, ItemGroup defaultGroup, ExtendedFoodComponent foodComponent) {
-		final CommonItemProperties props = parseCommonItemProperties(jsonItem, defaultGroup);
+	private Pair<Identifier, BlockItem> parseItemBlock(final JsonObject jsonItem, final Block block, RegistryKey<ItemGroup> defaultGroup, ExtendedFoodComponent foodComponent) {
+		final CommonItemProperties props = parseCommonItemProperties(jsonItem);
 
 		final BlockItem blockItem;
 		if (block instanceof ConsumableFoodBlock) {
@@ -250,6 +262,7 @@ public final class FoodLoader {
 		} else throw new RuntimeException();
 
 		props.registerComposterValue(blockItem);
+		groupApplier.addToExisting(blockItem, props.itemGroup == null ? defaultGroup : props.itemGroup);
 
 		return new Pair<>(props.id, blockItem);
 	}
@@ -275,7 +288,7 @@ public final class FoodLoader {
 		return new CommonFoodItemProperties(itemUseAction, itemConsumeRemainder, itemModelPredicate);
 	}
 
-	private CommonItemProperties parseCommonItemProperties(final JsonObject jsonItem, ItemGroup defaultGroup) throws JsonParseException {
+	private CommonItemProperties parseCommonItemProperties(final JsonObject jsonItem) throws JsonParseException {
 		Identifier itemId = jsonItem.has("id") ? new Identifier(JsonHelper.getString(jsonItem, "id")) : null;
 
 		final Item.Settings settings = new Item.Settings();
@@ -285,31 +298,32 @@ public final class FoodLoader {
 		final Float composterValue;
 
 		// group
-		group: if (jsonItem.has("group")) {
-			final String groupName = JsonHelper.getString(jsonItem, "group");
-
-			for (final ItemGroup group : ItemGroups.getGroups()) {
-				// TODO: better comparison method?
-				if (group.getDisplayName().getString().equalsIgnoreCase(groupName)) {
-					settings.group(group);
-					break group;
-				}
+		final RegistryKey<ItemGroup> group;
+		if (jsonItem.has("group")) {
+			final Identifier id; 
+			try {
+				id = new Identifier(JsonHelper.getString(jsonItem, "group"));
+			} catch (InvalidIdentifierException e) {
+				throw new JsonSyntaxException(e);
 			}
 
-			final StringBuilder builder = new StringBuilder();
-			builder
-				.append("invalid item group '")
-				.append(groupName)
-				.append("\' valid values are : ( ")
-				.append(ItemGroups.getGroups()
-						.stream()
-						.map(ItemGroup::getDisplayName)
-						.map(Text::getString)
-						.collect(Collectors.joining(" | ")))
-				.append(" )");
-
-			throw new JsonParseException(builder.toString());
-		} else settings.group(defaultGroup);
+			if (Registries.ITEM_GROUP.containsId(id)) {
+				group = RegistryKey.of(Registries.ITEM_GROUP.getKey(), id);
+			} else {
+				final StringBuilder builder = new StringBuilder();
+				builder.append("invalid item group '")
+						.append(id)
+						.append("\' valid values are : ( ")
+						.append(Registries.ITEM_GROUP.getKeys()
+								.stream()
+								.map(RegistryKey::getValue)
+								.map(Identifier::toString)
+								.collect(Collectors.joining(" | ")))
+						.append(" )");
+				throw new JsonParseException(builder.toString());
+			}
+		} else
+			group = null;
 
 		if (jsonItem.has("max_count")) settings.maxCount(JsonHelper.getInt(jsonItem, "max_count")); // maxCount key
 		if (!jsonItem.has("name")) throw new JsonSyntaxException("Missing name, expected to find a json text element");
@@ -327,14 +341,14 @@ public final class FoodLoader {
 
 		composterValue = jsonItem.has("composter") ? JsonHelper.getFloat(jsonItem, "composter") : null;
 
-		return new CommonItemProperties(Optional.ofNullable(itemId), settings, name, description, glint, composterValue);
+		return new CommonItemProperties(itemId, group, settings, name, description, glint, composterValue);
 	}
 
-	private record CommonItemProperties(Optional<Identifier> id, Item.Settings settings, Text name, Text description, boolean glint, Float composterValue) {
+	private static record CommonItemProperties(Identifier id, RegistryKey<ItemGroup> itemGroup, Item.Settings settings, Text name, Text description, boolean glint, Float composterValue) {
 		
 		/** register to composter map if required */
-		void registerComposterValue(Item blockItem) {
-			if (composterValue != null) ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.put(blockItem, composterValue.floatValue());
+		void registerComposterValue(Item item) {
+			if (composterValue != null) ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.put(item, composterValue.floatValue());
 		}
 		
 	}
@@ -430,7 +444,7 @@ public final class FoodLoader {
 		final Identifier soundId = new Identifier(string);
 
 		SoundEvent sound = Registries.SOUND_EVENT.get(soundId);
-		if (sound == null) sound = Registry.register(Registries.SOUND_EVENT, soundId, new SoundEvent(soundId));
+		if (sound == null) sound = Registry.register(Registries.SOUND_EVENT, soundId, SoundEvent.of(soundId));
 
 		return sound;
 	}

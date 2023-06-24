@@ -21,6 +21,7 @@ import mathjx.extensiblefood.command.FoodInfoCommand;
 import mathjx.extensiblefood.command.FoodStackArgumentType;
 import mathjx.extensiblefood.food.FoodLoader;
 import mathjx.extensiblefood.gui.screen.ErrorScreenGadget;
+import mathjx.extensiblefood.item.ItemGroupApplier;
 import mathjx.extensiblefood.item.tooltip.FoodTooltip;
 import mathjx.extensiblefood.item.tooltip.FoodTooltipComponentCallback;
 import net.fabricmc.api.EnvType;
@@ -96,7 +97,8 @@ public final class ExtensibleFood implements ModInitializer {
 		int counter = 0;
 
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(FOOD_DIR, ExtensibleFood::isValidFoodNamespace)) {
-			final FoodLoader loader = new FoodLoader();
+			final ItemGroupApplier groupApplier = new ItemGroupApplier();
+			final FoodLoader loader = new FoodLoader(groupApplier);
 			for (final Path dir : stream) {
 				LOGGER.debug("Searching in namespace directory {}", FOOD_DIR.relativize(dir).toString());
 				try {
@@ -105,6 +107,8 @@ public final class ExtensibleFood implements ModInitializer {
 					LOGGER.error("Failed to read files in food directory '" + dir.toString() + "'", e);
 				}
 			}
+			
+			groupApplier.apply();
 		} catch (final IOException e) {
 			LOGGER.error("Error when loading foods in directory {}", FOOD_DIR, e);
 		}
