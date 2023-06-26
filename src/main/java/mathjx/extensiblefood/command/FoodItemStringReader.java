@@ -8,10 +8,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+
 import net.minecraft.command.CommandSource;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -42,11 +42,12 @@ public final class FoodItemStringReader {
 		final int i = reader.getCursor();
 		final Identifier identifier = Identifier.fromCommandInput(reader);
 
-		;
-		final RegistryEntry<Item> item = registryWrapper.getEntry(RegistryKey.of(Registries.ITEM.getKey(), identifier)).orElseThrow(() -> {
-			reader.setCursor(i);
-			return ID_INVALID_EXCEPTION.createWithContext(reader, identifier.toString());
-		});
+		final RegistryEntry<Item> item = registryWrapper
+				.getOptional(RegistryKey.of(Registries.ITEM.getKey(), identifier))
+				.orElseThrow(() -> {
+					reader.setCursor(i);
+					return ID_INVALID_EXCEPTION.createWithContext(reader, identifier.toString());
+				});
 		if (item.value().isFood()) {
 			this.item = item;
 		} else {
