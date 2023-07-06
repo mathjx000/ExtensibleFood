@@ -19,6 +19,12 @@ import me.mathjx.extensiblefood.item.ExtensibleFoodCropItem;
 import me.mathjx.extensiblefood.item.ExtensibleFoodItem;
 import me.mathjx.extensiblefood.item.FoodConsumptionProgressModelPredicate;
 import me.mathjx.extensiblefood.item.ItemGroupApplier;
+import me.mathjx.extensiblefood.src.format.Element;
+import me.mathjx.extensiblefood.src.format.Group;
+import me.mathjx.extensiblefood.src.format.Id;
+import me.mathjx.extensiblefood.src.format.Relation;
+import me.mathjx.extensiblefood.src.format.Type;
+import me.mathjx.extensiblefood.src.format.Type.Kind;
 import me.mathjx.extensiblefood.util.FoodMathUtils;
 import me.mathjx.extensiblefood.util.UnsafeCommandRegistryAccess;
 import net.minecraft.block.Block;
@@ -58,8 +64,15 @@ public final class FoodLoader {
 		this.groupApplier = groupApplier;
 	}
 
+	@Group(name = "Basics", path = "basic")
+	@Element(path = {}, group = @Group(path = "basic.ident", name = "Identifiers"), description = """
+			Identifiers are used by the game to reference various elements by a name.
+			These identifiers are used notably by items and blocks.
+			[More informations about identifiers](https://minecraft.fandom.com/wiki/Resource_location)
+			""", id = @Id("ident"), type = @Type(kind = Kind.STRING))
 	public void applyFood(final JsonObject file, final Identifier autoId) throws JsonParseException {
 		{
+			@Element(path = "format_version", type = @Type(kind = Kind.INTEGER, notes = "Must be `3`."))
 			int fileVersion = JsonHelper.getInt(file, "format_version", 1);
 			
 			if (fileVersion < FORMAT_VERSION) {
@@ -68,7 +81,6 @@ public final class FoodLoader {
 				throw new JsonSyntaxException("This file use a newer (version " + fileVersion + ") format that is not supported by this version of the mod. Please update the mod in order to load this file.");
 			}
 		}
-		
 		
 		final ExtendedFoodComponent foodComponent = parseFoodComponent(JsonHelper.getObject(file, "food"), autoId);
 
@@ -131,16 +143,46 @@ public final class FoodLoader {
 	 *
 	 * @throws JsonParseException if any JSON syntax error is found
 	 */
+	@Element(path = "food", description = """
+			The food related properties.
+
+			You can find more informations about foods in general on the [~~Official~~ Wiki][mcwiki].
+			""", group = @Group(name = "Food Properties", path = "food"), type = @Type(kind = Kind.OBJECT))
 	ExtendedFoodComponent parseFoodComponent(final JsonObject foodJson, final Identifier foodId) throws JsonParseException {
 		final FoodComponent.Builder builder = new FoodComponent.Builder();
 
+		@Element(path = { "food", "hunger" }, type = @Type(kind = Kind.INTEGER), optional = true,
+				description = "Amount of hunder points added to the player's hunger bar.",
+				notes = "`2` points gives a full 🍖")
 		Integer hunger = null;
+		@Element(path = { "food", "saturation" }, type = @Type(kind = Kind.FLOAT), optional = true,
+				description = "Amount of saturation added to the player's (hidden) saturation bar.")
+		@Element(path = { "food", "saturation_ratio" }, type = @Type(kind = Kind.FLOAT), optional = true,
+				description = "TODO", relation = @Relation(path = { "food", "saturation" }, conflicts = true))
 		Float saturation = null;
-		Boolean alwaysEdible = null, meat = null, snack = null;
+		@Element(path = { "food", "always_edible" }, type = @Type(kind = Kind.BOOLEAN, defaultValue = "false"),
+				optional = true, description = "If the food is edible even when the hunger bar is already full.")
+		Boolean alwaysEdible = null;
+		@Element(path = { "food", "meat" }, type = @Type(kind = Kind.BOOLEAN, defaultValue = "false"), optional = true,
+				description = "If the food is meat, making it edible for wolves.")
+		Boolean meat = null;
+		@Element(path = { "food", "snack" }, type = @Type(kind = Kind.BOOLEAN, defaultValue = "false"), optional = true,
+				description = "If the food is snak, making it faster to eat by default.",
+				notes = "If [food::eat_time] is specified then it will override the default snak eat time.")
+		Boolean snack = null;
+		@Element(path = { "food", "eat_time" }, type = @Type(kind = Kind.INTEGER), optional = true,
+				description = "How long it takes to eat this food (in ticks).")
 		Integer itemEatTime;
+		@Element(path = { "food", "eat_sound" }, type = @Type(kind = Kind.STRING, reference = "ident"), optional = true,
+				description = """
+						Sound to play when eaten.
+						This property can create new sounds as needed.""")
 		SoundEvent itemEatSound;
 
 		if (foodJson.has("base")) { // then we need to copy all parameters of the given item
+			@Element(path = { "food", "base" }, optional = true, type = @Type(kind = Kind.STRING, reference = "ident"),
+					order = -1, description = "Copies values from an existing (food) item.",
+					notes = "If not specified, the other properties are required.")
 			final Item baseItem = JsonHelper.getItem(foodJson, "base");
 
 			if (!baseItem.isFood()) throw new JsonParseException("Invalid food base item '"
@@ -154,7 +196,12 @@ public final class FoodLoader {
 			meat = base.isMeat();
 			snack = base.isSnack();
 
-			if (!JsonHelper.getBoolean(foodJson, "effects_override", false)) {
+			@Element(path = { "food", "effects_override" }, optional = true,
+					type = @Type(kind = Kind.BOOLEAN, defaultValue = "false"),
+					description = "If the effects should not be copied.",
+					relation = @Relation(path = { "food", "base" }))
+			var bool = !JsonHelper.getBoolean(foodJson, "effects_override", false);
+			if (bool) {
 				base.getStatusEffects().forEach(p -> builder.statusEffect(p.getFirst(), p.getSecond()));
 			}
 		}
