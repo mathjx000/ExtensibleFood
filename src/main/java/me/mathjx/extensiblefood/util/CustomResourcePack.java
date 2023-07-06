@@ -31,7 +31,7 @@ public class CustomResourcePack extends DirectoryResourcePack {
 	
 	private CustomResourcePack(Path path, ResourceType type) {
 		// boolean - after diving in code it seems that non-vanilla packs are set to false
-		super(null, path, false);
+		super("ExtensibleFood - External Pack", path, false);
 		
 		this.type = type;
 	}
