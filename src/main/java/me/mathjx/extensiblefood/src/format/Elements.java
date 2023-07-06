@@ -9,22 +9,14 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.RECORD_COMPONENT;
 import static java.lang.annotation.ElementType.TYPE;
 
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target({ TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE, ANNOTATION_TYPE, RECORD_COMPONENT })
-@Repeatable(Groups.class)
-public @interface Group {
+public @interface Elements {
 
-	public String path() default "";
-
-	public String name() default "";
-
-	public String description() default "";
-
-	public int order() default 0;
+	public Element[] value();
 
 }
