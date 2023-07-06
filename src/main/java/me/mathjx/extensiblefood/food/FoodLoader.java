@@ -48,7 +48,7 @@ import net.minecraft.util.UseAction;
 
 public final class FoodLoader {
 
-	public static final int FORMAT_VERSION = 2;
+	public static final int FORMAT_VERSION = 3;
 	
 	private final UnsafeCommandRegistryAccess commandRegistryAccess = new UnsafeCommandRegistryAccess(
 			CommandManager.createRegistryAccess(BuiltinRegistries.createWrapperLookup()));
@@ -75,7 +75,7 @@ public final class FoodLoader {
 		Pair<Optional<Identifier>, Block> block;
 		if (file.has("block")) {
 			final JsonObject jsonBlock = JsonHelper.getObject(file, "block");
-			block = BlockParser.parseBlock(jsonBlock, foodComponent, commandRegistryAccess); // FIXME
+			block = BlockParser.parseBlock(jsonBlock, foodComponent, commandRegistryAccess);
 
 			if (jsonBlock.has("crop_item"))
 				throw new JsonSyntaxException("'crop_item' object was moved into the 'item' object as 'additional_crop_item' !");
