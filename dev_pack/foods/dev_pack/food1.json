@@ -32,7 +32,7 @@
 	},
 	
 	"item": {
-		"group": "redstone",
+		"group": "minecraft:redstone_blocks",
 		"max_count": 33,
 		"name": "raw name | this is bad dont do this for real objects",
 		"description": "again, raw text for testing purposes...",
