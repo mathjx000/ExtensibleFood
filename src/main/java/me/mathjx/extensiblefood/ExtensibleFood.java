@@ -113,7 +113,7 @@ public final class ExtensibleFood implements ModInitializer {
 			LOGGER.error("Error when loading foods in directory {}", FOOD_DIR, e);
 		}
 
-		LOGGER.info("Finished loading {} custom foods in {}ms.", Integer.toString(counter), Long.toString(System.currentTimeMillis() - start));
+		LOGGER.info("Successfully loaded {} custom foods in {}ms.", Integer.toString(counter), Long.toString(System.currentTimeMillis() - start));
 
 		ArgumentTypeRegistry.registerArgumentType(new Identifier(MOD_ID, "food_stack"), FoodStackArgumentType.class, ConstantArgumentSerializer.of(FoodStackArgumentType::new));
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess,

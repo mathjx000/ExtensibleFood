@@ -19,7 +19,8 @@ import me.mathjx.extensiblefood.item.ExtensibleFoodCropItem;
 import me.mathjx.extensiblefood.item.ExtensibleFoodItem;
 import me.mathjx.extensiblefood.item.FoodConsumptionProgressModelPredicate;
 import me.mathjx.extensiblefood.item.ItemGroupApplier;
-import me.mathjx.extensiblefood.util.Utils;
+import me.mathjx.extensiblefood.util.FoodMathUtils;
+import me.mathjx.extensiblefood.util.UnsafeCommandRegistryAccess;
 import net.minecraft.block.Block;
 import net.minecraft.block.ComposterBlock;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
@@ -30,9 +31,11 @@ import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
+import net.minecraft.registry.BuiltinRegistries;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.server.command.CommandManager;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -47,7 +50,8 @@ public final class FoodLoader {
 
 	public static final int FORMAT_VERSION = 2;
 	
-	/* private final CommandRegistryAccess commandRegistryAccess = new CommandRegistryAccess(DynamicRegistryManager.BUILTIN.get()); */
+	private final UnsafeCommandRegistryAccess commandRegistryAccess = new UnsafeCommandRegistryAccess(
+			CommandManager.createRegistryAccess(BuiltinRegistries.createWrapperLookup()));
 	private final ItemGroupApplier groupApplier;
 
 	public FoodLoader(ItemGroupApplier groupApplier) {
@@ -71,7 +75,7 @@ public final class FoodLoader {
 		Pair<Optional<Identifier>, Block> block;
 		if (file.has("block")) {
 			final JsonObject jsonBlock = JsonHelper.getObject(file, "block");
-			block = BlockParser.parseBlock(jsonBlock, foodComponent, /*commandRegistryAccess*/ null); // FIXME
+			block = BlockParser.parseBlock(jsonBlock, foodComponent, commandRegistryAccess); // FIXME
 
 			if (jsonBlock.has("crop_item"))
 				throw new JsonSyntaxException("'crop_item' object was moved into the 'item' object as 'additional_crop_item' !");
@@ -156,7 +160,7 @@ public final class FoodLoader {
 		}
 
 		if (foodJson.has("hunger") || hunger == null) hunger = JsonHelper.getInt(foodJson, "hunger");
-		if (foodJson.has("saturation") || saturation == null) saturation = Utils.humanReadableSaturationPointsToSaturationRatio(hunger, JsonHelper.getFloat(foodJson, "saturation"));
+		if (foodJson.has("saturation") || saturation == null) saturation = FoodMathUtils.humanReadableSaturationPointsToSaturationRatio(hunger, JsonHelper.getFloat(foodJson, "saturation"));
 		if (foodJson.has("saturation_ratio") || saturation == null) {
 			if (foodJson.has("saturation"))
 				throw new JsonSyntaxException("Conflit between properties 'saturation' and 'saturation_ratio'. Use only one of them.");

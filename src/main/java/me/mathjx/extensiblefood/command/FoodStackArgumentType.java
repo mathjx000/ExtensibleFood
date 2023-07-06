@@ -15,7 +15,6 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.ItemStackArgument;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryWrapper;
 
 public final class FoodStackArgumentType implements ArgumentType<ItemStackArgument> {

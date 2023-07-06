@@ -25,13 +25,13 @@ import me.mathjx.extensiblefood.block.particle.ParticleEmission;
 import me.mathjx.extensiblefood.food.ExtendedFoodComponent;
 import me.mathjx.extensiblefood.food.FoodLoader;
 import me.mathjx.extensiblefood.mixin.RenderLayerAccess;
+import me.mathjx.extensiblefood.util.UnsafeCommandRegistryAccess;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.MapColor;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.registry.Registries;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.state.property.IntProperty;
@@ -50,7 +50,7 @@ public final class BlockParser {
 	static IntProperty BRUH;
 
 	public static synchronized Pair<Optional<Identifier>, Block> parseBlock(final JsonObject jsonBlock, final ExtendedFoodComponent foodComponent,
-			final CommandRegistryAccess commandRegistryAccess) throws JsonSyntaxException {
+			final UnsafeCommandRegistryAccess commandRegistryAccess) throws JsonSyntaxException {
 		Identifier blockId = jsonBlock.has("id") ? new Identifier(JsonHelper.getString(jsonBlock, "id")) : null;
 		
 		final BlockType type;
@@ -105,7 +105,7 @@ public final class BlockParser {
 		final ParticleEmission particleEmission = jsonBlock.has("particles") ?
 				ParticleEmission.parseParticleEmission(
 						jsonBlock.get("particles"),
-						commandRegistryAccess.createWrapper(Registries.PARTICLE_TYPE.getKey())) :
+						commandRegistryAccess.unsafeCreateWrapper(Registries.PARTICLE_TYPE.getKey())) :
 						null;
 
 		final CollisionEffect collisionEffect = jsonBlock.has("collision_effects")

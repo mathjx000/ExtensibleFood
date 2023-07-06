@@ -10,9 +10,9 @@ import com.google.gson.JsonSyntaxException;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import me.mathjx.extensiblefood.util.UnsafeCommandRegistryAccess;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SideShapeType;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockPredicateArgumentType;
 import net.minecraft.util.InvalidIdentifierException;
 import net.minecraft.util.JsonHelper;
@@ -45,9 +45,6 @@ public abstract class BlockStayCondition {
 
 	static {
 		DESERIALIZERS.put("block_predicate", (json, commandRegistryAccess) -> {
-			if (true) // FIXME
-				throw new UnsupportedOperationException("block_predicate is not supported yet due to changes in game code");
-			
 			final JsonArray offsetArray = JsonHelper.getArray(json, "offset");
 			if (offsetArray.size() != 3) throw new JsonParseException("invalid offset array: length must be equals to 3");
 
@@ -59,7 +56,15 @@ public abstract class BlockStayCondition {
 
 			final String predicateStr = JsonHelper.getString(json, "predicate");
 
-			return new BlockPredicateCondition(offset, BlockPredicateArgumentType.blockPredicate(commandRegistryAccess).parse(new StringReader(predicateStr)));
+			return new BlockPredicateCondition(offset, BlockPredicateArgumentType.blockPredicate(
+					/*
+					 * SAFETY: under normal circumstances, tags are the only part that may be
+					 * troublesome but since only equality checks are performed on tag entries in
+					 * the worst case no entries are matched at all.
+					 * 
+					 * This DOES means however that save specific tags wont be taken into account.
+					 */
+					commandRegistryAccess.unsafeAccess()).parse(new StringReader(predicateStr)));
 		});
 		DESERIALIZERS.put("is_side_solid", (json, commandRegistryAccess) -> {
 			final String sideName = JsonHelper.getString(json, "side", Direction.DOWN.getName());
@@ -110,7 +115,7 @@ public abstract class BlockStayCondition {
 	 * @throws JsonParseException if any syntax errors occurs
 	 */
 	public static BlockStayCondition parseCondition(final JsonObject jsonCondition,
-			final CommandRegistryAccess commandRegistryAccess) throws JsonParseException {
+			final UnsafeCommandRegistryAccess commandRegistryAccess) throws JsonParseException {
 		final String conditionName = JsonHelper.getString(jsonCondition, "condition");
 		final ConditionDeserializer deserializer = DESERIALIZERS.get(conditionName);
 
@@ -177,8 +182,8 @@ public abstract class BlockStayCondition {
 	@FunctionalInterface
 	interface ConditionDeserializer {
 
-		BlockStayCondition deserialize(JsonObject json,
-				CommandRegistryAccess access) throws JsonParseException, InvalidIdentifierException, CommandSyntaxException;
+		BlockStayCondition deserialize(JsonObject json, UnsafeCommandRegistryAccess access)
+				throws JsonParseException, InvalidIdentifierException, CommandSyntaxException;
 
 	}
 

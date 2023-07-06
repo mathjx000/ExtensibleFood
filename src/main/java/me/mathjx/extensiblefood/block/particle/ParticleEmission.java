@@ -16,10 +16,10 @@ import com.google.gson.JsonSyntaxException;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import me.mathjx.extensiblefood.util.UnsafeRegistryWrapper;
 import net.minecraft.command.argument.ParticleEffectArgumentType;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleType;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -32,10 +32,7 @@ public abstract class ParticleEmission {
 
 	public abstract void spawn(World world, BlockPos pos, Random random);
 
-	public static ParticleEmission parseParticleEmission(final JsonElement jsonParticles, final RegistryWrapper<ParticleType<?>> registry) throws JsonSyntaxException {
-		if (true) // FIXME
-			throw new UnsupportedOperationException("particles are not supported yet due to changes in game code");
-		
+	public static ParticleEmission parseParticleEmission(final JsonElement jsonParticles, final UnsafeRegistryWrapper<ParticleType<?>> registry) throws JsonSyntaxException {
 		if (jsonParticles.isJsonArray()) {
 			final JsonArray array = jsonParticles.getAsJsonArray();
 			final ParticleEmission[] emissions = new ParticleEmission[array.size()];
@@ -67,7 +64,10 @@ public abstract class ParticleEmission {
 
 		ParticleEffect particleEffect;
 		try {
-			particleEffect = ParticleEffectArgumentType.readParameters(new StringReader(getString(jsonParticle, "particle")), registry);
+			particleEffect = ParticleEffectArgumentType.readParameters(
+					new StringReader(getString(jsonParticle, "particle")),
+					/* SAFETY: ParticleTypes are statically registered. */
+					registry.unsafeWrapper());
 		} catch (final CommandSyntaxException e) {
 			throw new JsonSyntaxException(e.getMessage(), e);
 		}

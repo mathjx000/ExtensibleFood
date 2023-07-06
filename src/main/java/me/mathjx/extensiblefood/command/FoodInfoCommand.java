@@ -6,7 +6,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.datafixers.util.Pair;
 
-import me.mathjx.extensiblefood.util.Utils;
+import me.mathjx.extensiblefood.util.FoodMathUtils;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.ItemStackArgument;
 import net.minecraft.command.argument.ItemStackArgumentType;
@@ -34,7 +34,7 @@ public final class FoodInfoCommand {
 
 			lines.add(Text.translatable("commands.extensible_food.foodinfo.info_header", arg.createStack(1, false).toHoverableText()));
 			lines.add(Text.translatable("commands.extensible_food.foodinfo.entry_hunger", createNumberText(component.getHunger())));
-			lines.add(Text.translatable("commands.extensible_food.foodinfo.entry_saturation", createNumberText(Utils.saturationRatioToHumanReadableSaturationPoints(component.getHunger(), component.getSaturationModifier())), createNumberText(component.getSaturationModifier())));
+			lines.add(Text.translatable("commands.extensible_food.foodinfo.entry_saturation", createNumberText(FoodMathUtils.saturationRatioToHumanReadableSaturationPoints(component.getHunger(), component.getSaturationModifier())), createNumberText(component.getSaturationModifier())));
 			lines.add(Text.translatable("commands.extensible_food.foodinfo.entry_meat", createBooleanText(component.isMeat())));
 			lines.add(Text.translatable("commands.extensible_food.foodinfo.entry_alwaysEdible", createBooleanText(component.isAlwaysEdible())));
 			lines.add(Text.translatable("commands.extensible_food.foodinfo.entry_snack", createBooleanText(component.isSnack())));
