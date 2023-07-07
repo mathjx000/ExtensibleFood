@@ -19,12 +19,6 @@ import java.lang.annotation.Target;
 @Repeatable(Groups.class)
 public @interface Group {
 
-	public String path() default "";
-
-	public String name() default "";
-
-	public String description() default "";
-
-	public int order() default 0;
+	public String path();
 
 }

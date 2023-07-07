@@ -14,4 +14,9 @@ public @interface Value {
 
 	public String[] notes() default {};
 
+	/**
+	 * A unique id that can be referenced.
+	 */
+	public String id() default "";
+
 }

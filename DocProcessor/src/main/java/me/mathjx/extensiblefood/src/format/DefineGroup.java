@@ -14,32 +14,35 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Definition of a group.
+ * 
+ * Groups can be nested.
+ */
 @Retention(RetentionPolicy.SOURCE)
 @Target({ TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE, ANNOTATION_TYPE, RECORD_COMPONENT })
-@Repeatable(Elements.class)
-public @interface Element {
-
-	public String group() default "";
+@Repeatable(DefineGroups.class)
+public @interface DefineGroup {
 
 	/**
-	 * The path of the property in the structure.
+	 * Dot separated path of the group
 	 */
-	public String[] path();
+	public String path();
 
-	public boolean optional() default false;
+	/**
+	 * The (human) name of the group
+	 */
+	public String name();
 
+	/**
+	 * A description of the group
+	 */
 	public String description() default "";
-
-	public Type[] type() default {};
-
-	public String[] notes() default {};
 
 	/**
 	 * A unique id that can be referenced.
 	 */
 	public String id() default "";
-
-	public Relation[] relation() default {};
 
 	public int order() default 0;
 

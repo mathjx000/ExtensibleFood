@@ -17,8 +17,13 @@ public @interface Type {
 	public String[] notes() default {};
 
 	public String reference() default "";
-	
+
 	public String defaultValue() default "";
+
+	/**
+	 * A unique id that can be referenced.
+	 */
+	public String id() default "";
 
 	public static enum Kind {
 

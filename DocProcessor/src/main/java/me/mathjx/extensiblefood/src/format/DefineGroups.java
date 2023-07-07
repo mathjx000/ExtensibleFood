@@ -9,38 +9,14 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.RECORD_COMPONENT;
 import static java.lang.annotation.ElementType.TYPE;
 
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target({ TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE, ANNOTATION_TYPE, RECORD_COMPONENT })
-@Repeatable(Elements.class)
-public @interface Element {
+public @interface DefineGroups {
 
-	public String group() default "";
-
-	/**
-	 * The path of the property in the structure.
-	 */
-	public String[] path();
-
-	public boolean optional() default false;
-
-	public String description() default "";
-
-	public Type[] type() default {};
-
-	public String[] notes() default {};
-
-	/**
-	 * A unique id that can be referenced.
-	 */
-	public String id() default "";
-
-	public Relation[] relation() default {};
-
-	public int order() default 0;
+	public DefineGroup[] value();
 
 }
